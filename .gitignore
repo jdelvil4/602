@@ -1,0 +1,55 @@
+# Python environments
+.venv/
+venv/
+env/
+Activate.ps1
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Raw / processed data
+data/raw/
+data/processed/
+
+# Local datasets
+Region_CAL.xlsx
+energydata_complete.csv
+appliances+energy+prediction/
+
+# BDG2 local copy / nested repository
+building-data-genome-project-2/
+
+# Large NREL data
+nrel/
+NREL/
+
+# Saved models
+outputs/models/
+*.joblib
+*.pkl
+*.pickle
+
+# Temporary / generated files
+project_structure.txt
+*.log
+*.tmp
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Experiment tracking
+mlruns/
+
+# Secrets
+.env
+credentials.json
+*.key

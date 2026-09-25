@@ -1,0 +1,5 @@
+Model,Best_CV_MAE,Number_of_Parameter_Combinations
+Lasso,252.1818637465076,6
+Random Forest,228.91911619437025,24
+Extra Trees,215.58849309824035,12
+Gradient Boosting,226.00451842983793,12
