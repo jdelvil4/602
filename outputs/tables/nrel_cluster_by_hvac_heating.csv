@@ -1,0 +1,14 @@
+cluster,in.hvac_heating_type,buildings,cluster_total,pct_of_cluster
+1,Ducted Heating,15,26,57.692307692307686
+1,Non-Ducted Heating,9,26,34.61538461538461
+1,Ducted Heat Pump,2,26,7.6923076923076925
+2,Ducted Heating,50,63,79.36507936507937
+2,Non-Ducted Heating,12,63,19.047619047619047
+2,Ducted Heat Pump,1,63,1.5873015873015872
+3,Ducted Heating,74,126,58.730158730158735
+3,Non-Ducted Heating,41,126,32.53968253968254
+3,Ducted Heat Pump,8,126,6.349206349206349
+3,Unknown,3,126,2.380952380952381
+4,Ducted Heating,23,35,65.71428571428571
+4,Non-Ducted Heating,11,35,31.428571428571427
+4,Unknown,1,35,2.857142857142857

@@ -636,3 +636,1026 @@ Correlation results were treated as descriptive associations rather than evidenc
 - outputs/figures/uci_eda_appliances_histogram.png
 - outputs/figures/uci_eda_hourly_consumption_profile.png
 - outputs/figures/uci_eda_correlation_heatmap.png
+
+## NREL Modeling Design — Pooled California ResStock Buildings
+
+### Primary Modeling Unit
+The primary NREL forecasting dataset will use a pooled building-hour structure.
+
+Each observation will represent one California ResStock residential building at one timestamp.
+
+### Scenario
+The baseline ResStock scenario (`upgrade=0`) will be used for the primary analysis.
+
+This avoids mixing baseline simulations with retrofit or intervention scenarios.
+
+### Geographic Scope
+Individual-building time-series profiles will be acquired from the California partition:
+
+timeseries_individual_buildings/by_state/upgrade=0/state=CA/
+
+### Validation Strategy
+The NREL analysis will evaluate two forms of generalization:
+
+1. Temporal generalization:
+   forecasting future observations for buildings represented during model development.
+
+2. Building generalization:
+   evaluating the model on building IDs excluded entirely from training and tuning.
+
+Time-based validation folds will be constructed using timestamp boundaries rather than arbitrary row boundaries so that observations from the same timestamp are not divided between training and validation simply because they belong to different buildings.
+
+### Next Step
+Inspect the California time-series file structure and develop a targeted downloader using the previously prepared California `bldg_id` list.
+
+### Observed Clustering Results
+
+K-Means solutions were evaluated for k = 2 through k = 8 using silhouette score and within-cluster inertia.
+
+The observed silhouette scores were:
+
+| k | Silhouette Score |
+|---:|---:|
+| 2 | 0.2029 |
+| 3 | 0.2228 |
+| 4 | 0.2011 |
+| 5 | 0.2114 |
+| 6 | 0.2001 |
+| 7 | 0.1778 |
+| 8 | 0.1909 |
+
+The highest silhouette score occurred at k = 3, so a three-cluster solution was retained.
+
+The final clusters contained:
+
+| Cluster | Observations | Share (%) | Mean Appliances | Mean Lights | Mean Outdoor Temperature (°C) | Mean Outdoor RH (%) |
+|---|---:|---:|---:|---:|---:|---:|
+| 0 | 506 | 15.385 | 941.621 | 106.443 | 5.999 | 83.651 |
+| 1 | 1,148 | 34.904 | 736.995 | 8.728 | 11.152 | 65.811 |
+| 2 | 1,635 | 49.711 | 370.061 | 6.813 | 5.221 | 88.333 |
+
+Cluster 0 represented a relatively high-consumption and high-lighting pattern. It was the smallest group and was concentrated most strongly around the evening period.
+
+Cluster 1 represented a moderate-to-high-consumption pattern with very low lighting demand. It was associated with the warmest and least humid outdoor conditions among the three clusters and was centered broadly around the afternoon period.
+
+Cluster 2 represented the lowest-consumption pattern and accounted for approximately half of all hourly observations. It was associated primarily with overnight and early-morning hours, low lighting demand, colder outdoor temperatures, and higher outdoor relative humidity.
+
+Because hour of day was represented using sine and cosine terms during clustering, temporal interpretation was based on the cyclical representation rather than relying solely on arithmetic averages of the raw hour field.
+
+The maximum silhouette score of approximately 0.223 indicates that the three groups provide useful broad descriptive segmentation but are not sharply separated clusters. The results are therefore interpreted as recurring operating patterns rather than rigid or naturally isolated categories.
+
+## UCI Exploratory Data Analysis
+
+### Status
+Completed
+
+### Objective
+Formally characterize the prepared hourly UCI prototype dataset before model development and produce report-ready exploratory summaries and visualizations.
+
+### Input
+data/processed/uci_hourly.csv
+
+### Data-Quality Checks
+The exploratory analysis recorded:
+- total row and column counts;
+- temporal coverage;
+- duplicate timestamps;
+- total missing values;
+- number of rows containing missing values.
+
+### Descriptive Analysis
+Descriptive statistics were generated for selected energy and outdoor environmental variables, including:
+- appliance energy consumption;
+- lighting energy consumption;
+- outdoor temperature;
+- outdoor relative humidity;
+- wind speed;
+- atmospheric pressure;
+- dew-point temperature.
+
+For each variable, the analysis recorded measures including mean, standard deviation, minimum, quartiles, maximum, and missing-value counts.
+
+### Energy-Consumption Distribution
+A histogram of hourly appliance energy consumption was generated to examine the overall distribution and the presence of relatively high-consumption observations.
+
+### Hour-of-Day Analysis
+Mean and median appliance energy consumption were summarized by hour of day.
+
+Mean lighting demand and outdoor temperature were also summarized hourly to provide context for recurring daily consumption patterns.
+
+### Correlation Analysis
+Pearson correlations were calculated among selected energy and outdoor environmental variables.
+
+The resulting correlation matrix was saved as a table and visualized using a heatmap.
+
+Correlation results were treated as descriptive associations rather than evidence of causal relationships.
+
+### Outputs
+- outputs/tables/uci_eda_summary.csv
+- outputs/tables/uci_eda_descriptive_statistics.csv
+- outputs/tables/uci_eda_hourly_profile.csv
+- outputs/tables/uci_eda_correlations.csv
+- outputs/figures/uci_eda_appliances_histogram.png
+- outputs/figures/uci_eda_hourly_consumption_profile.png
+- outputs/figures/uci_eda_correlation_heatmap.png
+
+## NREL Step 1 — California ResStock Metadata Preparation
+
+### Status
+Completed
+
+### Objective
+Begin adaptation of the completed UCI prototype pipeline to the NREL ResStock primary dataset by identifying the California residential building subset and preserving the building identifiers required for later load-profile retrieval and modeling.
+
+### Input
+data/resstock_metadata.parquet
+
+### Source Metadata
+The national ResStock metadata contained 549,800 records and 273 metadata variables before filtering.
+
+The building identifier was stored as the bldg_id index in the source Parquet file and was converted to a standard column during preparation.
+
+### Geographic Filtering
+Residential metadata records were filtered using the NREL `in.state` variable.
+
+Records with:
+
+in.state = CA
+
+were retained as the California ResStock subset.
+
+The `in.state_name` field was retained as a secondary geographic validation field.
+
+### Building Metadata
+The complete California metadata subset was preserved in Parquet format.
+
+A smaller building-index table was also created containing selected geographic, building-characteristic, weather-location, annual-electricity, and peak-demand fields.
+
+The building index preserves `bldg_id`, which will later be used to connect California metadata records to their corresponding time-series load profiles.
+
+### Validation
+The preparation script verifies:
+- presence of required state and building-ID variables;
+- uniqueness of building identifiers;
+- successful identification of California records;
+- California record count and proportion of the national metadata;
+- available metadata fields retained in the compact building index.
+
+### Outputs
+- data/processed/nrel_ca_resstock_metadata.parquet
+- data/processed/nrel_ca_resstock_buildings.csv
+- data/processed/nrel_ca_resstock_summary.csv
+
+### Next Step
+Use the California building identifiers to determine the appropriate NREL ResStock load-profile file structure and acquire the time-series electricity data required for one-hour-ahead forecasting.
+
+### NREL Individual-Building Time-Series Source
+
+The primary ResStock forecasting analysis uses individual-building time-series data rather than state-level aggregate profiles.
+
+The baseline California profiles were identified in the NREL OEDI hierarchy at:
+
+timeseries_individual_buildings/by_state/upgrade=0/state=CA/
+
+Individual files follow the naming convention:
+
+<bldg_id>-0.parquet
+
+where `bldg_id` corresponds to the building identifier retained from the ResStock metadata and `0` identifies the baseline upgrade scenario.
+
+A reproducible 25-building pilot sample is used initially to validate file acquisition, schema, temporal resolution, storage requirements, and preprocessing requirements before selecting the final modeling population.
+
+### NREL Individual-Building Time-Series Source
+
+The primary ResStock forecasting analysis uses individual-building time-series data rather than state-level aggregate profiles.
+
+The baseline California profiles were identified in the NREL OEDI hierarchy at:
+
+timeseries_individual_buildings/by_state/upgrade=0/state=CA/
+
+Individual files follow the naming convention:
+
+<bldg_id>-0.parquet
+
+where `bldg_id` corresponds to the building identifier retained from the ResStock metadata and `0` identifies the baseline upgrade scenario.
+
+A reproducible 25-building pilot sample is used initially to validate file acquisition, schema, temporal resolution, storage requirements, and preprocessing requirements before selecting the final modeling population.
+
+## NREL Pilot Profile Acquisition
+
+### Status
+Completed
+
+### Objective
+Validate targeted acquisition of California ResStock individual-building time-series profiles before scaling to the full modeling population.
+
+### Source
+NREL OEDI ResStock 2021 AMY2018 Release 1
+
+Path:
+
+timeseries_individual_buildings/by_state/upgrade=0/state=CA/
+
+### Pilot Design
+A reproducible sample of 25 California buildings was selected from the prepared California ResStock building index using random_state=42.
+
+### Results
+- California buildings available: 57,444
+- Pilot buildings requested: 25
+- Successful downloads: 25
+- Failed downloads: 0
+- Total downloaded size: approximately 61.83 MB
+
+### Outputs
+- data/raw/nrel/resstock_ca/upgrade=0/
+- data/processed/nrel_ca_pilot_download_manifest.csv
+
+### Purpose
+The pilot is used to validate file naming, accessibility, schema, temporal resolution, storage requirements, and preprocessing logic before selecting and downloading the final NREL modeling population.
+
+### Next Step
+Inspect the schema and temporal structure of the downloaded profiles and design the pooled building-hour preprocessing pipeline.
+
+## NREL Pilot Hourly Preparation
+
+### Status
+Completed
+
+### Input
+Twenty-five California ResStock baseline individual-building profiles sampled reproducibly using random_state=42.
+
+### Source Resolution
+Each raw building profile contained 35,040 observations covering calendar year 2018 at 15-minute resolution.
+
+### Target Variable
+The primary forecasting target is total electricity consumption:
+
+out.electricity.total.energy_consumption
+
+### Hourly Aggregation
+The 15-minute electricity-consumption intervals were aggregated to hourly resolution by summation.
+
+Because the source variable represents energy consumed during an interval rather than an instantaneous measurement, four consecutive 15-minute observations were summed to produce each hourly energy observation.
+
+The source timestamps are treated as interval-ending timestamps. Therefore, the intervals ending at 00:15, 00:30, 00:45, and 01:00 are combined into the hour ending at 01:00.
+
+### Validation
+Every pilot profile was checked for:
+- 35,040 raw observations;
+- unique timestamps;
+- continuous 15-minute spacing;
+- no missing timestamps;
+- no missing total-electricity observations.
+
+### Result
+All 25 profiles passed validation.
+
+After hourly aggregation:
+- buildings: 25
+- rows per building: 8,760
+- pooled building-hour rows: 219,000
+- missing values: 0
+- timestamp range: 2018-01-01 01:00:00 through 2019-01-01 00:00:00
+
+### Output
+data/processed/nrel_ca_pilot_hourly.parquet
+
+### Next Step
+Perform exploratory analysis of the pooled pilot to characterize between-building variation, consumption distributions, zero/negative values, daily load patterns, and storage requirements before selecting the final NREL modeling population.
+
+## NREL Pilot Exploratory Data Analysis
+
+### Status
+Completed
+
+### Dataset
+The pooled pilot contained 25 California ResStock buildings and 219,000 hourly building-level observations.
+
+### Data Integrity
+The prepared pilot contained:
+- 0 missing values;
+- 0 duplicate building-timestamp observations;
+- 0 negative total-electricity observations;
+- 0 zero total-electricity observations.
+
+Each building contributed 8,760 hourly observations covering calendar year 2018.
+
+### Consumption Distribution
+Hourly electricity consumption showed substantial variation both within and between buildings.
+
+Across the pooled pilot:
+- mean hourly consumption: 0.817497;
+- median hourly consumption: 0.535464;
+- minimum hourly consumption: 0.035704;
+- maximum hourly consumption: 37.901503.
+
+The higher mean relative to the median indicates a right-skewed distribution with occasional high-consumption periods.
+
+Annual building-level electricity totals ranged from approximately 1,208 to 19,605 in the source energy unit, demonstrating substantial heterogeneity across the pilot buildings.
+
+### Sampling Implication
+Because consumption scale varies substantially across buildings, the final NREL population will use a reproducible stratified building sample rather than relying only on a simple random sample.
+
+Sampling will emphasize pre-existing building characteristics such as building type, floor-area category, climate zone, and vintage.
+
+### Next Step
+Select the final California ResStock modeling population and assign buildings to development and completely held-out generalization groups.
+
+## NREL Final Modeling Profile Acquisition
+
+### Status
+Completed
+
+### Modeling Population
+A stratified sample of 250 California ResStock buildings was selected from the 57,444-building California population.
+
+The sample was stratified using:
+- residential building type;
+- California Energy Commission climate zone.
+
+Floor-area group and construction vintage were retained as representativeness diagnostics rather than hard stratification variables.
+
+### Generalization Roles
+The final sample was divided into:
+- 200 development buildings;
+- 50 completely held-out buildings.
+
+The held-out population will be excluded from model fitting and hyperparameter tuning and reserved for building-generalization evaluation.
+
+### Data Acquisition
+Individual baseline ResStock profiles were downloaded from the NREL End-Use Load Profiles dataset using upgrade=0.
+
+### Download Validation
+- requested profiles: 250
+- usable profiles: 250
+- failed profiles: 0
+- development profiles: 200
+- held-out profiles: 50
+- total local profile size: approximately 612.71 MB
+
+Each downloaded file was validated against its remote S3 object size.
+
+### Next Step
+Convert the 15-minute individual-building profiles to a pooled hourly modeling dataset while preserving building IDs and development/held-out roles.
+
+## NREL Full Hourly Modeling Dataset
+
+### Status
+Completed
+
+### Input
+250 California ResStock baseline individual-building profiles:
+- 200 development buildings
+- 50 held-out buildings
+
+### Processing
+Each 15-minute profile was validated for:
+- expected row count;
+- unique timestamps;
+- continuous 15-minute spacing;
+- no missing timestamps;
+- no missing total-electricity values.
+
+Total electricity consumption was aggregated from 15-minute intervals to hourly intervals by summation.
+
+### Result
+The pooled hourly modeling dataset contains:
+- 250 buildings;
+- 2,190,000 hourly building observations;
+- 1,752,000 development observations;
+- 438,000 held-out observations;
+- 0 missing values;
+- 0 duplicate building-timestamp observations.
+
+The hourly timestamp range is 2018-01-01 01:00:00 through 2019-01-01 00:00:00.
+
+### Output
+data/processed/nrel_ca_modeling_hourly.parquet
+
+### Next Step
+Merge selected static ResStock building metadata onto the hourly modeling backbone before adding dynamic weather and forecasting features.
+
+## Methodology Log Additions
+
+### NREL Final Modeling Population Selection
+Status: Completed
+
+Selected a reproducible sample of 250 California ResStock buildings from the 57,444-building California population.
+
+Sampling was stratified by:
+- residential building type;
+- California Energy Commission climate zone.
+
+The final sample was divided into:
+- 200 development buildings;
+- 50 completely held-out buildings.
+
+Floor-area group and construction vintage were retained as representativeness diagnostics.
+
+### NREL Final Profile Acquisition
+Status: Completed
+
+Downloaded 250 individual ResStock baseline profiles using upgrade=0.
+
+Validation results:
+- requested profiles: 250
+- usable profiles: 250
+- failed profiles: 0
+- development profiles: 200
+- held-out profiles: 50
+- total local profile size: approximately 612.71 MB
+
+### NREL Hourly Modeling Dataset
+Status: Completed
+
+Converted all 250 15-minute building profiles to hourly resolution by summing interval energy consumption.
+
+Final pooled dataset:
+- buildings: 250
+- total rows: 2,190,000
+- development rows: 1,752,000
+- held-out rows: 438,000
+- missing values: 0
+- duplicate building-timestamp rows: 0
+- timestamp range: 2018-01-01 01:00:00 through 2019-01-01 00:00:00
+
+Output:
+data/processed/nrel_ca_modeling_hourly.parquet
+
+### NREL Static Metadata Merge
+Status: Completed
+
+Merged selected static ResStock building metadata onto the 2.19-million-row hourly modeling dataset using bldg_id.
+
+Merged metadata included:
+- building type;
+- square footage;
+- CEC climate zone;
+- vintage;
+- county;
+- PUMA;
+- Building America climate zone;
+- geometry floor-area category;
+- heating fuel;
+- HVAC cooling type;
+- HVAC heating type;
+- occupants;
+- bedrooms;
+- number of stories;
+- derived floor-area group.
+
+Validation results:
+- metadata features: 15
+- metadata missing cells: 0
+- metadata columns with missing values: 0
+- duplicate building-timestamp rows: 0
+
+Output:
+data/processed/nrel_ca_modeling_base.parquet
+
+## NREL Weather Source Inspection
+
+### Status
+Completed
+
+The NREL ResStock AMY2018 weather archive was inspected to determine the appropriate geographic and temporal join strategy.
+
+The final 250-building modeling sample spans 41 California county identifiers.
+
+Weather files are stored by county using the same GISJOIN-style identifiers found in the ResStock `in.county` metadata field.
+
+An inspected California county weather file contained:
+- 8,760 hourly observations;
+- timestamp range from 2018-01-01 01:00:00 through 2019-01-01 00:00:00;
+- no missing values.
+
+Available hourly weather fields include:
+- dry-bulb temperature;
+- relative humidity;
+- wind speed;
+- wind direction;
+- global horizontal radiation;
+- direct normal radiation;
+- diffuse horizontal radiation.
+
+The weather timestamps align directly with the hourly ResStock electricity dataset.
+
+### Next Step
+Download the 41 county weather files required by the modeling sample and validate their schema, row counts, timestamps, and missingness before merging them with building-level hourly observations.
+
+## NREL County Weather Acquisition
+
+### Status
+Completed
+
+Downloaded the AMY2018 weather files required by the final 250-building California ResStock modeling sample.
+
+The modeling sample spans 41 unique county GISJOIN identifiers, so only those 41 county weather files were retrieved from the NREL weather archive.
+
+Each weather file was validated for:
+- required weather columns;
+- exactly 8,760 hourly rows;
+- timestamp range from 2018-01-01 01:00:00 through 2019-01-01 00:00:00;
+- continuous hourly spacing;
+- no duplicate timestamps;
+- no missing values.
+
+### Result
+- requested county files: 41
+- valid county files: 41
+- invalid county files: 0
+- total local size: approximately 25.32 MB
+
+### Output
+Raw weather directory:
+data/raw/nrel/weather/amy2018
+
+Download manifest:
+data/processed/nrel_ca_weather_download_manifest.csv
+
+### Next Step
+Merge county-level hourly weather observations onto the NREL building-hour modeling base using county identifier and timestamp.
+
+## NREL Weather Integration
+
+### Status
+Completed
+
+Merged county-level AMY2018 weather observations onto the NREL building-hour modeling base using:
+
+- `in.county`
+- hourly `timestamp`
+
+The combined county weather table contained:
+- 41 California counties;
+- 8,760 hourly observations per county;
+- 359,160 county-hour observations total.
+
+The weather-enriched building dataset contains:
+- 250 buildings;
+- 200 development buildings;
+- 50 held-out buildings;
+- 2,190,000 building-hour observations;
+- 41 represented counties;
+- 7 hourly weather variables;
+- 0 missing weather values;
+- 0 duplicate building-timestamp observations.
+
+Output:
+`data/processed/nrel_ca_modeling_weather.parquet`
+
+A quality-control check identified wind-direction values above the expected 0–360 degree range. These values will be investigated before wind direction is transformed or used as a modeling predictor.
+
+### Weather Quality Control
+
+A range check was performed on wind direction before feature engineering.
+
+Results:
+- total county-hour weather observations: 359,160
+- out-of-range wind-direction observations: 2
+- affected percentage: 0.000557%
+- anomalous value: 801 degrees
+- affected counties: G0600570 and G0600630
+- timestamp for both anomalies: 2018-12-15 13:00:00
+- associated wind speed: 5.1 m/s
+
+Because the source meaning of the 801-degree value was not established, wind direction was retained in the processed weather dataset for provenance but excluded from the forecasting predictor set rather than being manually corrected or imputed.
+
+## NREL Forecast Feature Engineering
+
+### Status
+Completed
+
+Constructed one-hour-ahead forecasting features for all 250 sampled California ResStock buildings.
+
+All history-dependent features were calculated independently within each `bldg_id` to prevent information from one building from entering another building's lag or rolling features.
+
+Features added included:
+- 1-hour electricity lag;
+- 24-hour electricity lag;
+- same-hour previous-day seasonal-naive value;
+- prior 24-hour mean electricity consumption;
+- prior 168-hour mean electricity consumption;
+- calendar features;
+- cyclical calendar encodings;
+- heating degree measure using an 18°C base;
+- cooling degree measure using a 22°C base;
+- one-hour-ahead electricity target.
+
+Rolling means were calculated only from observations preceding the current prediction time.
+
+Rows lacking the required 168-hour history or a future one-hour target were removed.
+
+### Result
+- buildings: 250
+- development buildings: 200
+- held-out buildings: 50
+- original rows: 2,190,000
+- removed rows: 42,250
+- usable forecasting rows: 2,147,750
+- usable rows per building: 8,591
+- missing required features: 0
+- duplicate building-timestamp rows: 0
+- predictor timestamp range: 2018-01-08 01:00:00 through 2018-12-31 23:00:00
+- target timestamp range: 2018-01-08 02:00:00 through 2019-01-01 00:00:00
+
+Output:
+data/processed/nrel_ca_forecast_features.parquet
+
+## NREL Chronological Data Split
+
+### Status
+Completed
+
+The NREL forecasting feature dataset was divided using chronological splits based on unique one-hour-ahead target timestamps rather than dataframe row order.
+
+Only the 200 development buildings were used for training, validation, and temporal testing.
+
+The 50 held-out buildings were excluded from all fitting and tuning and reserved for cross-building generalization evaluation over the same final temporal test period.
+
+### Split Design
+- Train: 70% of unique target timestamps
+- Validation: 15%
+- Temporal test: 15%
+- Held-out test: same target timestamps as temporal test
+
+### Result
+- train rows: 1,202,600
+- validation rows: 257,600
+- temporal test rows: 258,000
+- held-out test rows: 64,500
+
+### Time Periods
+Train target period:
+2018-01-08 02:00:00 through 2018-09-15 14:00:00
+
+Validation target period:
+2018-09-15 15:00:00 through 2018-11-08 06:00:00
+
+Temporal test target period:
+2018-11-08 07:00:00 through 2019-01-01 00:00:00
+
+Held-out test:
+Same target period as temporal test.
+
+### Leakage Safeguards
+- no overlapping target timestamps between train, validation, and temporal test;
+- all held-out building IDs are excluded from training;
+- all rows sharing the same target timestamp remain in the same temporal partition.
+
+## NREL Baseline Forecast Evaluation
+
+### Status
+Completed
+
+Three non-learned one-hour-ahead forecasting baselines were evaluated on the development validation period.
+
+Results:
+
+| Baseline | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Seasonal Naive | 0.256623 | 0.683993 | 84.394% | 32.818% |
+| Persistence | 0.324294 | 0.730158 | 90.090% | 41.807% |
+| 24-hour Rolling Mean | 0.412409 | 0.717021 | 88.470% | 68.891% |
+
+The seasonal-naive forecast produced the lowest validation error across all reported metrics and was retained as the primary baseline for comparison with learned models.
+
+Output:
+outputs/tables/nrel_baseline_validation_metrics.csv
+
+## NREL Linear Model Evaluation
+
+### Status
+Completed
+
+Linear Regression and Lasso were trained using the 200 development buildings and evaluated on the chronological validation period.
+
+The predictor set included:
+- lagged electricity consumption;
+- rolling electricity-consumption averages;
+- calendar and cyclical time features;
+- selected static building characteristics;
+- hourly weather predictors;
+- heating and cooling degree measures.
+
+The seasonal-naive predictor was excluded from the learned model feature set so that the learned models were evaluated independently against that benchmark.
+
+### Validation Results
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Seasonal Naive | 0.256623 | 0.683993 | 84.394% | 32.818% |
+| Linear Regression | 0.279820 | 0.576772 | 71.165% | 51.648% |
+| Lasso alpha=0.1 | 0.304741 | 0.592247 | 73.074% | 61.961% |
+
+Linear Regression was the best learned linear model by MAE but did not outperform the seasonal-naive benchmark on MAE.
+
+Linear Regression did produce lower RMSE and CVRMSE than the seasonal-naive baseline, indicating fewer or smaller large-magnitude forecast errors despite its higher average absolute error.
+
+Output:
+outputs/tables/nrel_linear_validation_metrics.csv
+
+## NREL Initial Tree-Based Model Evaluation
+
+### Status
+Completed
+
+Three nonlinear ensemble models were trained on the NREL development training set and evaluated on the chronological validation period:
+
+- Random Forest;
+- Extra Trees;
+- Histogram Gradient Boosting.
+
+The tree models used the same core predictor set as the linear models, including:
+- electricity lags;
+- rolling load statistics;
+- weather variables;
+- heating and cooling degree measures;
+- cyclical time features;
+- selected building characteristics.
+
+Categorical variables were ordinal encoded to keep the feature matrix compact for the 1.2-million-row training dataset.
+
+Initial model complexity was constrained for computational practicality:
+- Random Forest: 100 trees, maximum depth 16, minimum leaf size 5;
+- Extra Trees: 100 trees, maximum depth 16, minimum leaf size 5;
+- Histogram Gradient Boosting: 100 maximum boosting iterations.
+
+### Validation Results
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Extra Trees | 0.221916 | 0.503759 | 62.156% | 34.552% |
+| Random Forest | 0.222151 | 0.506903 | 62.544% | 33.228% |
+| Histogram Gradient Boosting | 0.231886 | 0.518835 | 64.016% | 37.795% |
+
+All three nonlinear models improved on the Seasonal Naive validation MAE of 0.256623.
+
+Extra Trees achieved the lowest initial validation MAE, improving MAE by approximately 13.52% relative to Seasonal Naive.
+
+Random Forest achieved a nearly identical MAE and the lowest MAPE among the learned tree models.
+
+Histogram Gradient Boosting trained substantially faster than the forest models while still improving on the Seasonal Naive MAE.
+
+Output:
+outputs/tables/nrel_tree_validation_metrics.csv
+
+## NREL Tree-Model Hyperparameter Tuning
+
+### Status
+Completed
+
+Random Forest, Extra Trees, and Histogram Gradient Boosting were tuned using three expanding time-aware cross-validation folds constructed from unique one-hour-ahead target timestamps.
+
+All observations sharing the same target timestamp were kept together within each fold to prevent pooled-building temporal leakage.
+
+The existing chronological validation dataset was excluded from hyperparameter selection and remained untouched until the final tuned configurations were selected.
+
+### Best Cross-Validation Configurations
+
+Random Forest:
+- max depth: 16
+- minimum samples per leaf: 10
+- maximum feature fraction: 1.0
+- mean CV MAE: 0.251029
+
+Extra Trees:
+- max depth: 20
+- minimum samples per leaf: 5
+- maximum feature fraction: 0.7
+- mean CV MAE: 0.238136
+
+Histogram Gradient Boosting:
+- learning rate: 0.05
+- maximum leaf nodes: 63
+- minimum samples per leaf: 20
+- L2 regularization: 0.0
+- mean CV MAE: 0.243602
+
+Forest models used 50 trees during cross-validation for computational efficiency and were refit using 200 trees for validation evaluation.
+
+### Tuned Validation Results
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Extra Trees | 0.212466 | 0.493882 | 60.938% | 32.718% |
+| Histogram Gradient Boosting | 0.218687 | 0.504919 | 62.299% | 32.869% |
+| Random Forest | 0.220616 | 0.508733 | 62.770% | 32.524% |
+
+Extra Trees achieved the lowest validation MAE and improved MAE by approximately 17.21% relative to the Seasonal Naive benchmark.
+
+Outputs:
+- outputs/tables/nrel_tree_tuning_cv_results.csv
+- outputs/tables/nrel_tuned_tree_validation_metrics.csv
+- outputs/tables/nrel_tree_best_parameters.csv
+
+## NREL Final Model Evaluation
+
+### Status
+Completed
+
+The tuned Extra Trees model was locked after validation-based model selection and refit using the combined development training and validation data.
+
+Final fitting data:
+- 1,460,200 development observations
+- 200 development buildings
+
+The locked model configuration was:
+- n_estimators: 200
+- max_depth: 20
+- min_samples_leaf: 5
+- max_features: 0.7
+- random_state: 42
+
+The model was evaluated on two untouched final test sets:
+
+1. Temporal test:
+   Future observations from the 200 development buildings.
+
+2. Held-out-building test:
+   The same future time period for 50 buildings that were never included in model fitting or tuning.
+
+Held-out buildings were allowed to use their own prior observed electricity consumption for lag and rolling predictors because the evaluation tests cross-building parameter generalization for one-hour-ahead forecasting rather than zero-history cold-start prediction.
+
+### Final Results
+
+| Test Set | Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---|---:|---:|---:|---:|
+| Temporal Test | Extra Trees | 0.226105 | 0.548413 | 69.489% | 33.771% |
+| Temporal Test | Seasonal Naive | 0.295150 | 0.790120 | 100.115% | 37.663% |
+| Held-Out Buildings | Extra Trees | 0.245475 | 0.598657 | 70.857% | 42.356% |
+| Held-Out Buildings | Seasonal Naive | 0.284434 | 0.822656 | 97.369% | 35.952% |
+
+Extra Trees improved MAE relative to Seasonal Naive by:
+- 23.39% on the temporal test;
+- 13.70% on the held-out-building test.
+
+The held-out-building MAPE was higher than Seasonal Naive, indicating that percentage-based errors remained challenging for some lower-consumption observations even though absolute-error performance improved.
+
+Outputs:
+- outputs/tables/nrel_final_test_metrics.csv
+- outputs/tables/nrel_final_test_predictions.parquet
+
+## NREL Final Forecast Diagnostics
+
+### Status
+Completed
+
+Final Extra Trees predictions were analyzed at the individual-building, building-type, climate-zone, and test-split levels.
+
+### Familiar Development Buildings
+On the temporal test period:
+- buildings evaluated: 200
+- Extra Trees outperformed Seasonal Naive by MAE for 175 buildings (87.5%)
+- median building-level MAE: 0.175356
+- best building MAE: 0.001732
+- worst building MAE: 0.908403
+
+### Held-Out Buildings
+On the same temporal test period:
+- buildings evaluated: 50
+- Extra Trees outperformed Seasonal Naive by MAE for 32 buildings (64.0%)
+- median building-level MAE: 0.150000
+- best building MAE: 0.019005
+- worst building MAE: 1.301053
+
+The held-out test showed greater variability in building-level forecasting performance. Although Extra Trees improved pooled MAE relative to Seasonal Naive, several unseen buildings produced substantially larger errors.
+
+### Residual Bias
+Aggregate residual bias was small:
+- temporal test bias: -0.008156
+- held-out test bias: 0.001422
+
+This suggests little systematic overall overprediction or underprediction.
+
+Outputs:
+- outputs/tables/nrel_final_metrics_by_building.csv
+- outputs/tables/nrel_final_metrics_by_building_type.csv
+- outputs/tables/nrel_final_metrics_by_climate_zone.csv
+- outputs/tables/nrel_final_split_comparison.csv
+- outputs/tables/nrel_final_residual_summary.csv
+
+## NREL Daily Load-Shape Clustering
+
+### Status
+Completed
+
+Average 24-hour electricity-consumption profiles were constructed for each of the 250 NREL California ResStock modeling buildings.
+
+Each building's profile was divided by its own mean hourly consumption before clustering so that KMeans emphasized temporal load shape rather than absolute electricity-consumption magnitude.
+
+The 24 normalized hourly profile dimensions were subsequently standardized before clustering.
+
+KMeans solutions from k=2 through k=8 were evaluated using silhouette score.
+
+### Cluster Selection
+
+| k | Silhouette Score |
+|---:|---:|
+| 2 | 0.272938 |
+| 3 | 0.286498 |
+| 4 | 0.291783 |
+| 5 | 0.236652 |
+| 6 | 0.208241 |
+| 7 | 0.189312 |
+| 8 | 0.190205 |
+
+The four-cluster solution produced the highest silhouette score and was retained.
+
+### Final Cluster Summary
+
+| Cluster | Buildings | Development | Held-Out | Mean Hourly Consumption | Peak Hour | Trough Hour | Peak/Trough Ratio |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 26 | 21 | 5 | 1.276812 | 10 | 15 | 1.845751 |
+| 2 | 63 | 52 | 11 | 1.015108 | 20 | 6 | 4.303080 |
+| 3 | 126 | 100 | 26 | 0.720578 | 22 | 6 | 2.206335 |
+| 4 | 35 | 27 | 8 | 1.017675 | 15 | 4 | 3.234761 |
+
+Cluster membership was not heavily concentrated in only the development or held-out role, with all four clusters containing buildings from both groups.
+
+Outputs:
+- outputs/tables/nrel_load_shape_silhouette_scores.csv
+- outputs/tables/nrel_load_shape_cluster_assignments.csv
+- outputs/tables/nrel_load_shape_cluster_profiles.csv
+- outputs/tables/nrel_building_mean_daily_profiles.csv
+- outputs/tables/nrel_load_shape_cluster_summary.csv
+
+## NREL Cluster Interpretation
+
+### Status
+Completed
+
+The four retained NREL daily load-shape clusters were merged with static building metadata to examine whether temporal consumption patterns corresponded with differences in building characteristics.
+
+The analysis compared:
+- building type;
+- CEC climate zone;
+- vintage;
+- heating fuel;
+- HVAC cooling type;
+- HVAC heating type;
+- floor area;
+- occupants;
+- bedrooms;
+- stories.
+
+### Cluster 1
+Cluster 1 contained 26 buildings and showed a morning/daytime-oriented load profile with a peak near 10:00.
+
+Characteristics included:
+- 42.3% Multi-Family with 5+ Units;
+- 88.5% electric heating;
+- mean floor area of approximately 1,658 square feet;
+- mean occupancy of approximately 2.04;
+- mean stories of approximately 3.15.
+
+This cluster was relatively flatter than the more strongly peaked single-family clusters.
+
+### Cluster 2
+Cluster 2 contained 63 buildings and exhibited a strong evening peak near 20:00.
+
+Characteristics included:
+- 81.0% Single-Family Detached;
+- 84.1% natural-gas heating;
+- 81.0% Central AC;
+- mean floor area of approximately 1,789 square feet;
+- mean occupancy of approximately 2.57.
+
+This cluster had the largest peak-to-trough normalized-load ratio, approximately 4.30.
+
+### Cluster 3
+Cluster 3 contained 126 buildings and was the largest cluster. Its profile peaked near 22:00.
+
+Characteristics included:
+- 45.2% Single-Family Detached;
+- 57.9% natural-gas heating;
+- mean floor area of approximately 1,324 square feet;
+- mean occupancy of approximately 1.85.
+
+The cluster showed more heterogeneous building and HVAC characteristics than the other groups and had the lowest average floor area.
+
+### Cluster 4
+Cluster 4 contained 35 buildings and showed an afternoon-oriented peak near 15:00.
+
+Characteristics included:
+- 80.0% Single-Family Detached;
+- 91.4% natural-gas heating;
+- 54.3% Central AC;
+- mean floor area of approximately 1,786 square feet;
+- mean occupancy of approximately 2.34.
+
+### Interpretation
+The clustering results suggest that normalized residential load shape is associated with several structural and equipment characteristics, particularly housing type, heating fuel, and HVAC configuration.
+
+CEC climate zone appeared less strongly concentrated within clusters than several building-level characteristics, so climate zone should not be treated as the primary defining factor without additional analysis.
+
+Outputs:
+- outputs/tables/nrel_cluster_metadata_summary.csv
+- outputs/tables/nrel_cluster_by_building_type.csv
+- outputs/tables/nrel_cluster_by_climate_zone.csv
+- outputs/tables/nrel_cluster_by_vintage.csv
+- outputs/tables/nrel_cluster_by_heating_fuel.csv
+- outputs/tables/nrel_cluster_by_hvac_cooling.csv
+- outputs/tables/nrel_cluster_by_hvac_heating.csv
+- outputs/tables/nrel_cluster_continuous_characteristics.csv
+- outputs/tables/nrel_cluster_profiles_long.csv

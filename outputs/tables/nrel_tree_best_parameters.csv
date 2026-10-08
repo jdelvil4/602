@@ -1,0 +1,4 @@
+model,max_depth,min_samples_leaf,max_features,final_n_estimators,learning_rate,max_leaf_nodes,l2_regularization,max_iter
+Random Forest,16.0,10,1.0,200.0,,,,
+Extra Trees,20.0,5,0.7,200.0,,,,
+Hist Gradient Boosting,,20,,,0.05,63.0,0.0,200.0

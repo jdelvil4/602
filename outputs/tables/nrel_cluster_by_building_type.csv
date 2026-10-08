@@ -1,0 +1,19 @@
+cluster,in.geometry_building_type_recs,buildings,cluster_total,pct_of_cluster
+1,Multi-Family with 5+ Units,11,26,42.30769230769231
+1,Single-Family Detached,10,26,38.46153846153847
+1,Multi-Family with 2 - 4 Units,4,26,15.384615384615385
+1,Mobile Home,1,26,3.8461538461538463
+2,Single-Family Detached,51,63,80.95238095238095
+2,Multi-Family with 2 - 4 Units,4,63,6.349206349206349
+2,Multi-Family with 5+ Units,4,63,6.349206349206349
+2,Mobile Home,2,63,3.1746031746031744
+2,Single-Family Attached,2,63,3.1746031746031744
+3,Single-Family Detached,57,126,45.23809523809524
+3,Multi-Family with 5+ Units,40,126,31.746031746031743
+3,Single-Family Attached,13,126,10.317460317460316
+3,Multi-Family with 2 - 4 Units,10,126,7.936507936507936
+3,Mobile Home,6,126,4.761904761904762
+4,Single-Family Detached,28,35,80.0
+4,Multi-Family with 5+ Units,3,35,8.571428571428571
+4,Multi-Family with 2 - 4 Units,2,35,5.714285714285714
+4,Single-Family Attached,2,35,5.714285714285714

@@ -1,0 +1,2 @@
+buildings,rows,minimum_timestamp,maximum_timestamp,missing_values,duplicate_building_timestamps,negative_electricity_rows,zero_electricity_rows,mean_hourly_electricity,median_hourly_electricity,minimum_hourly_electricity,maximum_hourly_electricity,minimum_building_annual_electricity,maximum_building_annual_electricity,pilot_parquet_size_mb
+25,219000,2018-01-01 01:00:00,2019-01-01,0,0,0,0,0.8174971037416157,0.5354637935651236,0.0357039217126768,37.901502609440314,1208.4924160112619,19604.65288225673,1.705143928527832
