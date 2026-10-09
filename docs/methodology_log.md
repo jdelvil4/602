@@ -1659,3 +1659,563 @@ Outputs:
 - outputs/tables/nrel_cluster_by_hvac_heating.csv
 - outputs/tables/nrel_cluster_continuous_characteristics.csv
 - outputs/tables/nrel_cluster_profiles_long.csv
+
+## NREL ComStock Metadata Inspection
+
+### Status
+Completed
+
+The NREL ComStock metadata was inspected before designing the commercial-building modeling sample.
+
+The metadata contained:
+- 347,144 buildings;
+- 114 metadata columns;
+- a unique integer `bldg_id` index;
+- no duplicate building IDs.
+
+California was represented consistently using both:
+- `in.state_name = California`;
+- `in.state_abbreviation = CA`.
+
+Both fields identified 40,048 California commercial buildings, representing approximately 11.54% of the full ComStock metadata.
+
+Potentially useful commercial-building characteristics identified during inspection included:
+- `in.building_type`;
+- `in.sqft`;
+- `in.number_of_stories`;
+- `in.hvac_system_type`;
+- `in.heating_fuel`;
+- `in.service_water_heating_fuel`;
+- `in.county`;
+- `in.climate_zone_ashrae_2004`;
+- `in.climate_zone_building_america`;
+- `stat.occupant_density_ppl_per_m_2`.
+
+ComStock contains 14 commercial building types nationally.
+
+Annual and aggregate output fields beginning with `out.` were identified in the metadata. These fields are retained only in the full source metadata for provenance and diagnostics and are excluded from the compact building index and future forecasting predictor set to avoid target leakage.
+
+## NREL ComStock California Preparation
+
+### Status
+Completed
+
+The full NREL ComStock metadata was filtered to California using:
+
+`in.state_abbreviation == "CA"`
+
+The resulting California commercial-building population contained:
+- 40,048 buildings;
+- 14 commercial building types;
+- 7 ASHRAE 2004 climate zones;
+- no duplicate building IDs.
+
+A compact building index was created containing 14 selected input and structural metadata fields. No metadata columns beginning with `out.` were retained in the compact index.
+
+### California Building-Type Distribution
+
+The largest commercial building types were:
+- Warehouse: 12,388 buildings (30.93%);
+- RetailStripmall: 8,334 (20.81%);
+- SmallOffice: 7,595 (18.96%);
+- RetailStandalone: 5,422 (13.54%).
+
+The least common types were:
+- Hospital: 62 buildings;
+- LargeOffice: 135;
+- LargeHotel: 166.
+
+### California Climate-Zone Distribution
+
+ASHRAE 2004 climate zones were highly concentrated:
+- 3B: 29,289 buildings (73.13%);
+- 3C: 9,944 buildings (24.83%);
+- all remaining zones collectively represented approximately 2% of the California population.
+
+### Candidate Joint Strata
+
+Building type × ASHRAE climate zone produced:
+- 81 strata;
+- smallest stratum: 1 building;
+- largest stratum: 9,555 buildings;
+- 21 strata with fewer than 5 buildings;
+- 30 strata with fewer than 10 buildings.
+
+Because many joint strata are sparse, building type × climate zone will not be used as a rigid hard-stratification scheme for the final modeling sample.
+
+### Numeric Characteristics
+
+California ComStock buildings showed:
+- median floor area: 17,500 square feet;
+- mean floor area: approximately 40,290 square feet;
+- median number of stories: 1;
+- mean number of stories: approximately 1.42;
+- median occupant density: approximately 0.055 people/m².
+
+Outputs:
+- data/processed/comstock_ca_metadata.parquet
+- data/processed/comstock_ca_buildings.csv
+- data/processed/comstock_ca_summary.csv
+- data/processed/comstock_ca_building_type_distribution.csv
+- data/processed/comstock_ca_ashrae_zone_distribution.csv
+- data/processed/comstock_ca_building_type_ashrae_strata.csv
+- data/processed/comstock_ca_heating_fuel_distribution.csv
+- data/processed/comstock_ca_hvac_distribution.csv
+- data/processed/comstock_ca_numeric_summary.csv
+
+## NREL ComStock Modeling-Sample Selection
+
+### Status
+Completed
+
+A 250-building California ComStock modeling sample was selected from the 40,048-building California commercial population.
+
+The sampling design used:
+- commercial building type as the primary hard representation variable;
+- proportional ASHRAE climate-zone balancing within each building type;
+- random state 42 for reproducibility.
+
+The final sample was divided into:
+- 200 development buildings;
+- 50 held-out buildings.
+
+### Building-Type Representation
+
+All 14 California ComStock building types were represented.
+
+The largest sampled groups were:
+- Warehouse: 77 buildings;
+- RetailStripmall: 52;
+- SmallOffice: 47;
+- RetailStandalone: 33;
+- FullServiceRestaurant: 11.
+
+Rare commercial types were assigned a minimum of two buildings:
+- Hospital: 2;
+- LargeOffice: 2;
+- LargeHotel: 2.
+
+This slightly overrepresents rare commercial types but preserves type coverage for later commercial-building generalization analysis.
+
+Overall building-type proportions remained close to the California ComStock population distribution.
+
+### Climate-Zone Representation
+
+The final sample contained:
+- ASHRAE 3B: 182 buildings (72.8%);
+- ASHRAE 3C: 68 buildings (27.2%).
+
+The five rarer California zones received no sampled buildings under proportional allocation because they collectively represent only a small fraction of the California ComStock population.
+
+No manual minimum climate-zone quota was imposed because commercial building type is the primary representation variable for the later BDG2 comparison.
+
+Outputs:
+- data/processed/comstock_ca_modeling_sample.csv
+- data/processed/comstock_ca_modeling_sample_summary.csv
+- data/processed/comstock_ca_sample_building_type_comparison.csv
+- data/processed/comstock_ca_sample_climate_zone_comparison.csv
+
+## NREL ComStock Timeseries Path Inspection
+
+### Status
+Completed
+
+The public NREL ComStock AMY2018 baseline timeseries directory was inspected using anonymous access to the OEDI S3 bucket.
+
+The release contains state-level individual-building timeseries under:
+
+`2021/comstock_amy2018_release_1/timeseries_individual_buildings/by_state/upgrade=0/`
+
+California baseline building files are located under:
+
+`state=CA/`
+
+Individual files follow the naming convention:
+
+`<bldg_id>-0.parquet`
+
+The inspection confirmed that the California directory contains individual ComStock building parquet files and is suitable for acquisition of the selected 250-building modeling sample.
+
+## NREL ComStock Modeling-Profile Acquisition
+
+### Status
+Completed
+
+Hourly individual-building profiles were downloaded for the full 250-building California ComStock modeling sample from the NREL/OEDI public S3 release:
+
+`2021/comstock_amy2018_release_1/timeseries_individual_buildings/by_state/upgrade=0/state=CA/`
+
+The requested sample contained:
+- 250 total commercial buildings;
+- 200 development buildings;
+- 50 held-out buildings.
+
+All requested building profiles were successfully downloaded and validated as readable parquet files.
+
+Download results:
+- requested buildings: 250;
+- usable buildings: 250;
+- failed buildings: 0;
+- development buildings available: 200;
+- held-out buildings available: 50;
+- total local size: approximately 785.57 MB.
+
+A download manifest was saved to:
+
+`data/processed/comstock_ca_modeling_download_manifest.csv`
+
+Raw individual-building files were stored under:
+
+`data/raw/nrel/comstock_ca/upgrade=0/`
+
+## NREL ComStock Profile Schema Inspection
+
+### Status
+Completed
+
+An individual downloaded ComStock profile was inspected before pooled-data preparation.
+
+The inspected profile contained:
+- 35,040 observations;
+- 15-minute temporal resolution;
+- timestamps from 2018-01-01 00:15 through 2019-01-01 00:00;
+- total electricity consumption in `out.electricity.total.energy_consumption`;
+- no missing values in the total-electricity target for the inspected building.
+
+Because the project forecasting workflow operates at hourly resolution, four consecutive 15-minute electricity-consumption observations will be summed into one hourly observation.
+
+## NREL ComStock Hourly Profile Preparation
+
+### Status
+Completed
+
+The 250 downloaded California ComStock building profiles were converted from 15-minute resolution to hourly resolution.
+
+For each building:
+- the source field `out.electricity.total.energy_consumption` was used as the electricity-consumption target;
+- four consecutive 15-minute interval values were summed into each hourly value;
+- hourly timestamps were aligned to the end of each hour.
+
+The combined hourly dataset contains:
+- 250 buildings;
+- 2,190,000 total rows;
+- 1,752,000 development rows;
+- 438,000 held-out rows;
+- 8,760 hourly rows per building;
+- timestamps from 2018-01-01 01:00 through 2019-01-01 00:00;
+- 0 missing target values;
+- 0 duplicate building-timestamp rows.
+
+Hourly electricity consumption had:
+- mean: approximately 89.45;
+- median: approximately 37.80;
+- minimum: approximately 0.19;
+- maximum: approximately 2,879.22.
+
+Outputs:
+- data/processed/comstock_ca_modeling_hourly.parquet
+- data/processed/comstock_ca_modeling_hourly_summary.csv
+
+## NREL ComStock Metadata Merge
+
+### Status
+Completed
+
+Selected static commercial-building metadata were merged onto the hourly ComStock modeling panel.
+
+The merged dataset contains:
+- 2,190,000 hourly rows;
+- 250 commercial buildings;
+- 17 total columns;
+- 9 selected modeling metadata features;
+- 4 auxiliary metadata fields;
+- 0 missing selected metadata values;
+- 0 duplicate building-timestamp rows;
+- 0 retained `out.*` outcome-derived metadata fields.
+
+The resulting parquet file is approximately 19.01 MB.
+
+Outputs:
+- data/processed/comstock_ca_modeling_base.parquet
+- data/processed/comstock_ca_modeling_base_summary.csv
+- data/processed/comstock_ca_modeling_base_columns.csv
+
+## NREL ComStock Weather Coverage Inspection
+
+### Status
+Completed
+
+The 250-building ComStock modeling sample spans 32 California counties.
+
+Existing AMY2018 county weather files from the ResStock phase were compared against the ComStock sample counties.
+
+Coverage results:
+- 32 ComStock sample counties;
+- 28 counties already covered;
+- 242 of 250 buildings already covered;
+- 8 buildings lacked local weather coverage.
+
+The four missing county weather files were:
+- G0600890: 3 sampled buildings;
+- G0600550: 2 sampled buildings;
+- G0601130: 2 sampled buildings;
+- G0600450: 1 sampled building.
+
+Existing county-level weather files will be reused where available, and only the four missing county files will be downloaded.
+
+## NREL ComStock Missing Weather Acquisition
+
+### Status
+Completed
+
+Four additional AMY2018 county weather files were required to complete weather coverage for the 250-building ComStock sample.
+
+The downloaded counties were:
+- G0600450;
+- G0600550;
+- G0600890;
+- G0601130.
+
+Download results:
+- requested counties: 4;
+- usable counties: 4;
+- failed counties: 0;
+- total downloaded size: approximately 2.29 MB.
+
+These files supplemented the 41 county weather files already acquired during the ResStock phase.
+
+## NREL ComStock Weather Merge
+
+### Status
+Completed
+
+County-level AMY2018 weather data were merged onto the 250-building California ComStock hourly modeling panel using `in.county` and hourly timestamp.
+
+The merged dataset contains:
+- 2,190,000 hourly rows;
+- 250 commercial buildings;
+- 32 California counties;
+- 7 weather features;
+- 0 missing weather values;
+- 0 duplicate building-timestamp rows.
+
+Weather features:
+- dry-bulb temperature;
+- relative humidity;
+- wind speed;
+- wind direction;
+- global horizontal radiation;
+- direct normal radiation;
+- diffuse horizontal radiation.
+
+The merged timestamp range remained:
+- first timestamp: 2018-01-01 01:00;
+- last timestamp: 2019-01-01 00:00.
+
+Output:
+- data/processed/comstock_ca_modeling_weather.parquet
+- data/processed/comstock_ca_modeling_weather_summary.csv
+
+## NREL ComStock Forecast Feature Engineering
+
+### Status
+Completed
+
+Forecasting features were created for the 250-building California ComStock sample using the same one-hour-ahead forecasting convention used for ResStock.
+
+Features included:
+- hourly, weekday, month, and day-of-year indicators;
+- cyclical hour, weekday, and month encodings;
+- weekend indicator;
+- heating degree above an 18°C heating base;
+- cooling degree above a 22°C cooling base;
+- 1-hour consumption lag;
+- 24-hour consumption lag;
+- seasonal-naive reference corresponding to the forecast target 24 hours earlier;
+- prior 24-hour rolling mean;
+- prior 168-hour rolling mean;
+- one-hour-ahead electricity-consumption target.
+
+Wind direction was retained for auditing but excluded from the intended weather predictor set.
+
+Results:
+- input rows: 2,190,000;
+- usable feature rows: 2,147,750;
+- rows removed: 42,250;
+- rows removed per building: 169;
+- usable rows per building: 8,591;
+- development rows: 1,718,200;
+- held-out rows: 429,550;
+- first predictor timestamp: 2018-01-08 01:00;
+- last predictor timestamp: 2018-12-31 23:00;
+- 0 missing target values;
+- 0 duplicate building-timestamp rows.
+
+Outputs:
+- data/processed/comstock_ca_forecast_features.parquet
+- data/processed/comstock_ca_forecast_features_summary.csv
+- data/processed/comstock_ca_forecast_feature_columns.csv
+
+## NREL ComStock Chronological Split
+
+### Status
+Completed
+
+The ComStock forecasting feature panel was divided chronologically using forecast-target timestamps.
+
+The 200 development buildings were divided into:
+- training: earliest 70%, 6,013 target timestamps and 1,202,600 rows;
+- validation: next 15%, 1,288 target timestamps and 257,600 rows;
+- temporal test: final 15%, 1,290 target timestamps and 258,000 rows.
+
+The 50 completely held-out buildings were excluded from training and validation and evaluated only during the same final 1,290-hour period used for the temporal test:
+- held-out test: 64,500 rows.
+
+Target periods:
+- training: 2018-01-08 02:00 through 2018-09-15 14:00;
+- validation: 2018-09-15 15:00 through 2018-11-08 06:00;
+- temporal test: 2018-11-08 07:00 through 2019-01-01 00:00;
+- held-out test: 2018-11-08 07:00 through 2019-01-01 00:00.
+
+There was no overlap between development and held-out building IDs.
+
+Outputs:
+- data/processed/comstock_ca_train.parquet
+- data/processed/comstock_ca_validation.parquet
+- data/processed/comstock_ca_temporal_test.parquet
+- data/processed/comstock_ca_held_out_test.parquet
+- data/processed/comstock_ca_split_summary.csv
+
+## NREL ComStock Baseline Validation
+
+### Status
+Completed
+
+Three baseline forecasting approaches were evaluated on the ComStock validation period: seasonal naive, Linear Regression, and Lasso Regression.
+
+Validation results:
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Seasonal Naive | 9.9413 | 54.5905 | 71.538% | 14.761% |
+| Linear Regression | 13.2488 | 33.7199 | 44.188% | 60.235% |
+| Lasso Regression (alpha = 0.1) | 13.2895 | 33.7086 | 44.174% | 61.601% |
+
+All 257,600 validation observations had nonzero actual consumption and were included in MAPE.
+
+The seasonal-naive baseline produced the lowest MAE and MAPE, while Linear Regression and Lasso substantially reduced RMSE and CVRMSE. This divergence indicates that model performance should continue to be interpreted using multiple complementary error metrics rather than a single score.
+
+Seasonal naive was retained only as a benchmark and was not included as a regression predictor.
+
+Outputs:
+- outputs/tables/comstock_baseline_validation_metrics.csv
+- outputs/models/comstock_linear_baseline.joblib
+- outputs/models/comstock_lasso_baseline.joblib
+## NREL ComStock Initial Tree-Model Comparison
+
+### Status
+Completed
+
+Three nonlinear tree-based forecasting models were evaluated on the ComStock validation set.
+
+Results:
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Random Forest | 3.3047 | 9.4765 | 12.419% | 5.093% |
+| Extra Trees | 3.8202 | 9.3955 | 12.312% | 7.324% |
+| HistGradientBoosting | 6.5156 | 14.3157 | 18.760% | 15.230% |
+
+Random Forest produced the lowest validation MAE and MAPE. Extra Trees produced a slightly lower RMSE and CVRMSE, while HistGradientBoosting underperformed both ensemble forests.
+
+The initial Random Forest used 200 unrestricted trees with max_features = 0.7 and min_samples_leaf = 1.
+
+The initial Extra Trees model required a resource-constrained configuration because the unrestricted 200-tree version exceeded available system memory during training. The completed Extra Trees model therefore used:
+- 200 trees;
+- max_depth = 20;
+- min_samples_leaf = 5;
+- max_features = 0.7;
+- n_jobs = 2.
+
+The Random Forest result was preserved from the prior successful fit even though its model object could not be saved because the original script terminated during the subsequent Extra Trees fit.
+
+HistGradientBoosting used 200 boosting iterations, learning rate 0.1, 31 maximum leaf nodes, and minimum leaf size 20.
+
+All models were evaluated on the same 257,600-row validation set.
+
+## NREL ComStock Time-Aware Tree Tuning
+
+### Status
+Completed
+
+Random Forest and Extra Trees were tuned using three expanding timestamp-aware cross-validation folds over the development training period.
+
+To limit computational cost on the 1.2-million-row training panel, the tuning search used 100 trees per candidate and evaluated two configurations per model. Candidate selection used mean cross-validation MAE as the primary criterion. The selected configuration for each model was then refit with 200 trees on the complete training set and evaluated on the untouched validation period.
+
+Best Random Forest candidate:
+- max_depth: unrestricted;
+- min_samples_leaf: 1;
+- max_features: 0.7;
+- mean CV MAE: 5.2409;
+- CV MAE standard deviation: 0.9621.
+
+Best Extra Trees candidate:
+- max_depth: 20;
+- min_samples_leaf: 5;
+- max_features: 0.7;
+- mean CV MAE: 5.3473;
+- CV MAE standard deviation: 0.8579.
+
+Untouched validation results:
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Random Forest | 3.3047 | 9.4765 | 12.419% | 5.093% |
+| Extra Trees | 3.8202 | 9.3955 | 12.312% | 7.324% |
+
+Random Forest was selected as the final ComStock supervised model based on the predefined MAE tuning criterion. Extra Trees produced slightly lower RMSE/CVRMSE but was worse on both MAE and MAPE.
+
+Outputs:
+- outputs/tables/comstock_tree_tuning_cv_results.csv
+- outputs/tables/comstock_tree_tuned_best_params.csv
+- outputs/tables/comstock_tree_tuned_validation_metrics.csv
+- outputs/models/comstock_random_forest_tuned.joblib
+- outputs/models/comstock_extra_trees_tuned.joblib
+## NREL ComStock Final Evaluation
+
+### Status
+Completed
+
+The tuned Random Forest was locked after validation and evaluated without further tuning on two final test settings:
+
+1. a temporal test containing the 200 development buildings during the final chronological period;
+2. a held-out-building test containing 50 buildings that were excluded entirely from model development, evaluated during the same final time period.
+
+Shared final target period:
+- 2018-11-08 07:00 through 2019-01-01 00:00.
+
+Temporal-test results:
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Tuned Random Forest | 3.0919 | 11.1803 | 15.251% | 4.374% |
+| Seasonal Naive | 8.6002 | 40.0955 | 54.693% | 14.410% |
+
+The tuned Random Forest improved MAE by 64.05% relative to seasonal naive and produced lower per-building MAE for 198 of 200 development buildings (99.0%).
+
+Held-out-building results:
+
+| Model | MAE | RMSE | CVRMSE | MAPE |
+|---|---:|---:|---:|---:|
+| Tuned Random Forest | 15.7418 | 49.5577 | 38.470% | 12.877% |
+| Seasonal Naive | 13.5190 | 55.6079 | 43.167% | 12.783% |
+
+On completely unseen buildings, the Random Forest reduced RMSE and CVRMSE but did not improve MAE or MAPE relative to seasonal naive. It produced lower per-building MAE for 21 of 50 held-out buildings (42.0%).
+
+This contrast indicates that the model transfers strongly across future time for known buildings but less consistently across previously unseen commercial buildings.
+
+Outputs:
+- outputs/tables/comstock_final_test_metrics.csv
+- outputs/tables/comstock_final_building_metrics.csv
+- outputs/predictions/comstock_temporal_test_predictions.parquet
+- outputs/predictions/comstock_held_out_test_predictions.parquet

@@ -1,0 +1,3 @@
+model,candidate,max_depth,min_samples_leaf,max_features,mean_cv_mae,std_cv_mae
+Random Forest,1,,1,0.7,5.240945129462592,0.9621387207562088
+Extra Trees,1,20.0,5,0.7,5.347325069748596,0.8579006584224745
