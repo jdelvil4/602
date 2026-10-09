@@ -1,0 +1,19 @@
+metric,value
+raw_hourly_rows,97992
+observed_demand_rows,97968
+missing_demand_rows,24
+first_observed_utc,2015-07-01 08:00:00
+last_observed_utc,2026-09-03 07:00:00
+first_observed_local_time,2015-07-01 01:00:00
+last_observed_local_time,2026-09-03 00:00:00
+mean_hourly_demand_mwh,31359.547903397026
+median_hourly_demand_mwh,30141.0
+minimum_hourly_demand_mwh,2309.0
+maximum_hourly_demand_mwh,63622.0
+demand_p95_mwh,44644.649999999994
+demand_p99_mwh,51110.33
+mean_net_generation_mwh,23970.044984076434
+mean_total_interchange_mwh,-6479.417391393108
+mean_absolute_forecast_error_mwh,1276.0189245467907
+median_absolute_forecast_error_mwh,782.0
+mean_absolute_percentage_forecast_error,4.114925159324002

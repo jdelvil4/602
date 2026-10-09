@@ -1,0 +1,2 @@
+candidate,n_estimators,max_depth,min_samples_leaf,max_features,random_state,mean_cv_MAE,std_cv_MAE,mean_cv_CVRMSE_percent,mean_cv_MAPE_percent
+RF_candidate_2,200,20,5,0.7,42,9.064582145707405,0.779132318019197,24.419354114777253,376.1742149484599

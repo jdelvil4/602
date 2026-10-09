@@ -498,89 +498,6 @@ Cluster labels are interpreted as descriptive pattern identifiers and do not inh
 ### Next Step
 Review and interpret the resulting clusters and formally close the UCI prototype before adapting the tested workflow to the project's primary datasets.
 
-## Step 10 — K-Means Consumption-Pattern Clustering
-
-### Status
-Completed
-
-### Objective
-Use unsupervised K-Means clustering to identify recurring hourly energy-consumption and environmental operating patterns within the UCI prototype dataset.
-
-### Input
-data/processed/uci_hourly.csv
-
-### Analysis Scope
-K-Means clustering was treated as a descriptive unsupervised analysis rather than a forecasting model.
-
-The full prepared hourly UCI dataset was therefore used for cluster-pattern discovery rather than applying the supervised train-validation-test partitioning framework.
-
-### Clustering Variables
-The following variables were selected:
-
-- appliance energy consumption;
-- lighting energy consumption;
-- outdoor temperature;
-- outdoor relative humidity;
-- wind speed;
-- cyclical hour-of-day sine component;
-- cyclical hour-of-day cosine component;
-- weekend indicator.
-
-The feature set was intentionally restricted to interpretable energy, outdoor-weather, and temporal characteristics.
-
-Lagged consumption, rolling forecasting variables, forecast targets, and the broader collection of correlated indoor environmental sensors were not used for clustering.
-
-### Temporal Feature Engineering
-Hour of day was represented using sine and cosine transformations so that the cyclical relationship between late-night and early-morning hours was preserved.
-
-A binary weekend indicator was also included.
-
-### Scaling
-All clustering variables were standardized using StandardScaler prior to fitting K-Means.
-
-Scaling was necessary because K-Means uses distance-based assignments and the input variables are measured on substantially different numerical scales.
-
-Cluster profiles were subsequently summarized using the original, unstandardized variables to preserve interpretability.
-
-### Cluster-Count Selection
-Candidate K-Means solutions were evaluated for cluster counts from k = 2 through k = 8.
-
-For each candidate solution:
-- within-cluster inertia was recorded;
-- silhouette score was calculated.
-
-The final cluster count was selected using the highest silhouette score.
-
-### Final K-Means Model
-The selected K-Means model used:
-- the selected number of clusters;
-- random_state = 42;
-- n_init = 20.
-
-### Cluster Interpretation
-Cluster profiles were created using mean original-scale values for:
-- appliance consumption;
-- lighting consumption;
-- outdoor temperature;
-- outdoor relative humidity;
-- wind speed;
-- hour of day;
-- weekend status.
-
-The number and percentage of hourly observations assigned to each cluster were also calculated.
-
-Cluster labels are interpreted as descriptive pattern identifiers and do not inherently represent ordered categories.
-
-### Outputs
-- outputs/tables/uci_kmeans_cluster_selection.csv
-- outputs/tables/uci_kmeans_cluster_profiles.csv
-- outputs/tables/uci_clustered_hourly.csv
-- outputs/figures/uci_kmeans_cluster_selection.png
-- outputs/figures/uci_kmeans_consumption_vs_temperature.png
-- outputs/figures/uci_kmeans_cluster_sizes.png
-
-### Next Step
-Review and interpret the resulting clusters and formally close the UCI prototype before adapting the tested workflow to the project's primary datasets.
 
 ## UCI Exploratory Data Analysis
 
@@ -703,61 +620,6 @@ Cluster 2 represented the lowest-consumption pattern and accounted for approxima
 Because hour of day was represented using sine and cosine terms during clustering, temporal interpretation was based on the cyclical representation rather than relying solely on arithmetic averages of the raw hour field.
 
 The maximum silhouette score of approximately 0.223 indicates that the three groups provide useful broad descriptive segmentation but are not sharply separated clusters. The results are therefore interpreted as recurring operating patterns rather than rigid or naturally isolated categories.
-
-## UCI Exploratory Data Analysis
-
-### Status
-Completed
-
-### Objective
-Formally characterize the prepared hourly UCI prototype dataset before model development and produce report-ready exploratory summaries and visualizations.
-
-### Input
-data/processed/uci_hourly.csv
-
-### Data-Quality Checks
-The exploratory analysis recorded:
-- total row and column counts;
-- temporal coverage;
-- duplicate timestamps;
-- total missing values;
-- number of rows containing missing values.
-
-### Descriptive Analysis
-Descriptive statistics were generated for selected energy and outdoor environmental variables, including:
-- appliance energy consumption;
-- lighting energy consumption;
-- outdoor temperature;
-- outdoor relative humidity;
-- wind speed;
-- atmospheric pressure;
-- dew-point temperature.
-
-For each variable, the analysis recorded measures including mean, standard deviation, minimum, quartiles, maximum, and missing-value counts.
-
-### Energy-Consumption Distribution
-A histogram of hourly appliance energy consumption was generated to examine the overall distribution and the presence of relatively high-consumption observations.
-
-### Hour-of-Day Analysis
-Mean and median appliance energy consumption were summarized by hour of day.
-
-Mean lighting demand and outdoor temperature were also summarized hourly to provide context for recurring daily consumption patterns.
-
-### Correlation Analysis
-Pearson correlations were calculated among selected energy and outdoor environmental variables.
-
-The resulting correlation matrix was saved as a table and visualized using a heatmap.
-
-Correlation results were treated as descriptive associations rather than evidence of causal relationships.
-
-### Outputs
-- outputs/tables/uci_eda_summary.csv
-- outputs/tables/uci_eda_descriptive_statistics.csv
-- outputs/tables/uci_eda_hourly_profile.csv
-- outputs/tables/uci_eda_correlations.csv
-- outputs/figures/uci_eda_appliances_histogram.png
-- outputs/figures/uci_eda_hourly_consumption_profile.png
-- outputs/figures/uci_eda_correlation_heatmap.png
 
 ## NREL Step 1 — California ResStock Metadata Preparation
 
@@ -2219,3 +2081,710 @@ Outputs:
 - outputs/tables/comstock_final_building_metrics.csv
 - outputs/predictions/comstock_temporal_test_predictions.parquet
 - outputs/predictions/comstock_held_out_test_predictions.parquet
+## BDG2 Electricity-Meter Preparation
+
+### Status
+Completed
+
+The Building Data Genome Project 2 cleaned electricity-meter data and building metadata were prepared for use as the project's real-meter commercial benchmark.
+
+The cleaned electricity file contained:
+- 1,578 electricity-meter building columns;
+- hourly observations spanning 2016-01-01 00:00 through 2017-12-31 23:00;
+- one timestamp column and one electricity-consumption column per building in the original wide-format source.
+
+The electricity data were reshaped from wide format into a long building-hour panel and joined to BDG2 building metadata using `building_id`.
+
+The complete prepared panel contained:
+- 1,578 metered buildings;
+- 27,684,432 possible building-hour observations;
+- 25,212,579 observed electricity values;
+- 2,471,853 missing electricity values;
+- overall electricity missingness of approximately 8.93%;
+- 19 sites;
+- 16 represented primary-space-usage categories;
+- 0 duplicate building-timestamp observations;
+- 0 missing square-footage values.
+
+Meter completeness varied substantially across individual buildings. Some buildings contained nearly complete two-year histories, while others had extensive missing periods.
+
+Missing electricity target values were not imputed. Instead, temporal coverage was evaluated separately by building so that artificial electricity values would not enter lagged forecasting features or the real-meter generalization evaluation.
+
+Outputs:
+- data/processed/bdg2_electricity_hourly.parquet
+- data/processed/bdg2_electricity_hourly_summary.csv
+- data/processed/bdg2_building_coverage.csv
+
+
+## BDG2 Modeling-Year Coverage Inspection
+
+### Status
+Completed
+
+Hourly electricity coverage was evaluated separately for calendar years 2016 and 2017 before selecting the primary BDG2 modeling period.
+
+### 2016 Coverage
+
+Among the 1,578 metered buildings:
+- 1,185 had at least 90% observed hourly coverage;
+- 1,117 had at least 95% coverage;
+- 932 had at least 98% coverage;
+- 859 had at least 99% coverage;
+- 160 had complete 100% coverage.
+
+Mean building-level coverage was approximately 89.65%.
+
+### 2017 Coverage
+
+Among the 1,578 metered buildings:
+- 1,350 had at least 90% observed hourly coverage;
+- 1,293 had at least 95% coverage;
+- 1,183 had at least 98% coverage;
+- 919 had at least 99% coverage;
+- 188 had complete 100% coverage.
+
+Mean building-level coverage was approximately 92.50%.
+
+Because 2017 provided a larger population of buildings with strong hourly meter coverage, calendar year 2017 was selected for the primary BDG2 forecasting and simulated-to-real generalization analyses.
+
+A minimum coverage threshold of 95% was retained. Requiring complete 100% coverage would have reduced the available 2017 population to only 188 buildings, which would not support the planned 250-building modeling cohort.
+
+Output:
+- data/processed/bdg2_yearly_coverage.csv
+
+
+## BDG2 Modeling-Sample Selection
+
+### Status
+Completed
+
+A 250-building BDG2 modeling sample was selected from calendar year 2017.
+
+Eligibility criteria were:
+- at least 95% observed hourly electricity coverage during 2017;
+- known primary space usage.
+
+After applying both criteria, 1,279 buildings were eligible for sampling.
+
+The sampling design used:
+- primary space usage as the representation variable;
+- proportional allocation across primary-space-usage categories;
+- random state 42 for reproducibility.
+
+The final sample was divided into:
+- 200 development buildings;
+- 50 completely held-out buildings.
+
+The selected sample had:
+- mean hourly meter coverage: approximately 99.26%;
+- minimum hourly meter coverage: approximately 95.07%.
+
+### Primary-Space-Usage Representation
+
+The largest groups in the 250-building sample were:
+- Education: 95 buildings;
+- Office: 48;
+- Entertainment/public assembly: 31;
+- Public services: 27;
+- Lodging/residential: 26.
+
+Additional represented categories included:
+- Healthcare: 4;
+- Parking: 4;
+- Other: 3;
+- Manufacturing/industrial: 2;
+- Retail: 2;
+- Services: 2;
+- Warehouse/storage: 2;
+- Food sales and service: 1;
+- Religious worship: 1;
+- Technology/science: 1;
+- Utility: 1.
+
+The development/held-out assignment preserved approximate primary-space-usage representation where sample sizes permitted. Very rare categories were not forced to appear in both groups because doing so would distort proportional allocation.
+
+The held-out buildings will remain excluded from BDG2 model fitting and tuning and will be reserved for cross-building evaluation, matching the general evaluation structure used for the NREL ResStock and ComStock analyses.
+
+Outputs:
+- data/processed/bdg2_modeling_sample.csv
+- data/processed/bdg2_modeling_sample_summary.csv
+
+## BDG2 Weather Integration
+
+### Status
+Completed
+
+The selected 250-building BDG2 modeling cohort was restricted to calendar year 2017 and merged with site-level hourly weather observations using `site_id` and timestamp.
+
+The resulting modeling panel contains:
+- 250 buildings;
+- 200 development buildings;
+- 50 held-out buildings;
+- 14 represented sites;
+- 2,190,000 building-hour rows;
+- timestamp range from 2017-01-01 00:00 through 2017-12-31 23:00;
+- 2,173,717 observed electricity values;
+- 16,283 missing electricity values;
+- overall electricity missingness of approximately 0.744%;
+- 0 duplicate building-timestamp observations.
+
+Weather-variable missingness after expansion to the building-hour panel was:
+- air temperature: 0.461%;
+- dew temperature: 0.615%;
+- wind speed: 0.671%;
+- wind direction: 6.825%;
+- sea-level pressure: 8.860%;
+- one-hour precipitation depth: 22.612%;
+- cloud coverage: 45.769%;
+- six-hour precipitation depth: 96.284%.
+
+Because cloud coverage, precipitation, sea-level pressure, and wind direction contain substantially greater missingness and are not required for the planned ComStock-to-BDG2 shared feature set, they will not be used as primary transfer-model predictors.
+
+Outputs:
+- data/processed/bdg2_modeling_weather.parquet
+- data/processed/bdg2_modeling_weather_summary.csv
+- data/processed/bdg2_modeling_weather_building_coverage.csv
+- data/processed/bdg2_weather_columns.csv
+
+## BDG2 Forecast Feature Engineering
+
+### Status
+Completed
+
+One-hour-ahead forecasting features were constructed for the 250-building BDG2 modeling cohort using the same temporal feature convention established for the NREL ResStock and ComStock analyses.
+
+The input panel contained:
+- 2,190,000 building-hour rows;
+- 250 buildings;
+- 200 development buildings;
+- 50 held-out buildings;
+- 16,283 missing observed electricity readings.
+
+Missing electricity readings were not imputed.
+
+Short gaps in the two retained shared weather predictors were forward-filled within each site for a maximum of three consecutive hours using only previously observed weather values.
+
+After this weather treatment:
+- missing air-temperature values decreased from 10,086 to 4,667;
+- missing wind-speed values decreased from 14,695 to 4,702.
+
+Forecasting features included:
+- 1-hour electricity lag;
+- 24-hour electricity lag;
+- same-hour previous-day seasonal-naive value;
+- prior 24-hour mean electricity consumption;
+- prior 168-hour mean electricity consumption;
+- calendar features;
+- cyclical hour, weekday, and month encodings;
+- weekend indicator;
+- heating degree measure using an 18°C base;
+- cooling degree measure using a 22°C base;
+- one-hour-ahead electricity target.
+
+Historical load features were calculated independently within each building.
+
+Rolling means used complete historical windows. Missing meter observations were therefore allowed to invalidate dependent lag and rolling features rather than being replaced with synthetic electricity values.
+
+Rows with missing required forecasting features, weather predictors, or one-hour-ahead targets were excluded from the final feature dataset.
+
+Results:
+- input rows: 2,190,000;
+- usable forecasting rows: 1,918,809;
+- removed rows: 271,191;
+- buildings retained: 250;
+- development buildings retained: 200;
+- held-out buildings retained: 50;
+- development rows: 1,530,393;
+- held-out rows: 388,416;
+- minimum usable rows per building: 2,160;
+- maximum usable rows per building: 8,591;
+- remaining missing required forecasting features: 0;
+- duplicate building-timestamp rows: 0;
+- predictor timestamp range: 2017-01-08 00:00 through 2017-12-31 22:00;
+- target timestamp range: 2017-01-08 01:00 through 2017-12-31 23:00.
+
+Outputs:
+- data/processed/bdg2_forecast_features.parquet
+- data/processed/bdg2_forecast_features_summary.csv
+- data/processed/bdg2_forecast_feature_building_summary.csv
+## BDG2 Chronological Split
+
+### Status
+Completed
+
+The BDG2 forecasting feature panel was divided chronologically using unique one-hour-ahead target timestamps.
+
+Only the 200 development buildings were used for training, validation, and temporal testing.
+
+The 50 held-out buildings remained completely excluded from model development and were reserved for cross-building evaluation during the same final target-time window used for the temporal test.
+
+### Split Design
+
+The 8,591 unique development target timestamps were divided into:
+- training: earliest 70%, containing 6,013 target timestamps;
+- validation: next 15%, containing 1,288 target timestamps;
+- temporal test: final 15%, containing 1,290 target timestamps.
+
+Because BDG2 contains real missing-meter periods, row counts are not constant across timestamps or buildings. Temporal boundaries were therefore determined from unique target timestamps rather than raw dataframe row counts.
+
+### Results
+
+Training:
+- 1,068,891 rows;
+- 200 buildings;
+- 6,013 unique target timestamps;
+- target period: 2017-01-08 01:00 through 2017-09-15 13:00.
+
+Validation:
+- 234,555 rows;
+- 200 buildings;
+- 1,288 unique target timestamps;
+- target period: 2017-09-15 14:00 through 2017-11-08 05:00.
+
+Temporal test:
+- 226,947 rows;
+- 200 buildings;
+- 1,290 unique target timestamps;
+- target period: 2017-11-08 06:00 through 2017-12-31 23:00.
+
+Held-out-building test:
+- 58,133 rows;
+- 50 buildings;
+- 1,290 unique target timestamps;
+- target period: 2017-11-08 06:00 through 2017-12-31 23:00.
+
+No building IDs overlapped between the development and held-out groups.
+
+Outputs:
+- data/processed/bdg2_train.parquet
+- data/processed/bdg2_validation.parquet
+- data/processed/bdg2_temporal_test.parquet
+- data/processed/bdg2_held_out_test.parquet
+- data/processed/bdg2_split_summary.csv
+
+## BDG2 Baseline Validation
+
+### Status
+Completed
+
+Three one-hour-ahead forecasting baselines were evaluated on the BDG2 chronological validation period using the shared transfer-compatible predictor set.
+
+The validation dataset contained 234,555 observations from the 200 development buildings.
+
+Models evaluated:
+- seasonal naive;
+- Linear Regression;
+- Lasso Regression with alpha = 0.1.
+
+The learned linear models used:
+- 1-hour electricity lag;
+- 24-hour electricity lag;
+- prior 24-hour mean electricity consumption;
+- prior 168-hour mean electricity consumption;
+- cyclical hour, weekday, and month variables;
+- weekend indicator;
+- air temperature;
+- wind speed;
+- heating degree measure;
+- cooling degree measure.
+
+The seasonal-naive reference was retained strictly as a benchmark and was not supplied as a predictor to the learned models.
+
+Linear Regression and Lasso numerical predictors were standardized using transformations fit only on the training data.
+
+### Validation Results
+
+| Model | MAE | CVRMSE | MAPE | MAPE n |
+|---|---:|---:|---:|---:|
+| Seasonal Naive | 14.9023 | 40.356% | 19.796% | 234,555 |
+| Linear Regression | 14.0068 | 23.880% | 140,572.338% | 234,555 |
+| Lasso alpha=0.1 | 13.9437 | 23.880% | 137,992.548% | 234,555 |
+
+Lasso produced the lowest validation MAE, while Linear Regression and Lasso both substantially reduced CVRMSE relative to seasonal naive.
+
+The exceptionally large mean percentage errors for the learned linear models require additional diagnostic interpretation because MAPE is highly sensitive to actual electricity values approaching zero. All 234,555 validation observations had nonzero targets and were therefore included under the project's standard MAPE calculation.
+
+No temporal-test or held-out-building observations were used during baseline fitting or validation.
+
+Outputs:
+- outputs/tables/bdg2_baseline_validation_metrics.csv
+- outputs/models/bdg2_linear_baseline.joblib
+- outputs/models/bdg2_lasso_baseline.joblib
+
+### MAPE Diagnostic
+
+The exceptionally large mean percentage errors produced by Linear Regression and Lasso were investigated before proceeding to nonlinear models.
+
+The BDG2 validation target contains a nontrivial number of very small but nonzero electricity readings:
+- 7,728 observations (3.295%) were below 0.001;
+- 10,304 observations (4.393%) were below 0.01;
+- 10,618 observations (4.527%) were below 0.1;
+- 13,108 observations (5.589%) were below 1.0.
+
+Because the project MAPE implementation excludes only zero-valued actuals, these near-zero observations remain valid denominators and can generate extremely large percentage errors from modest absolute prediction errors.
+
+For Linear Regression:
+- median absolute error: 8.051;
+- median percentage error: 13.350%;
+- 95th-percentile percentage error: approximately 4,553.5%;
+- 99th-percentile percentage error: approximately 4.91 million%;
+- negative predictions: 13,564.
+
+For Lasso:
+- median absolute error: 7.963;
+- median percentage error: 13.241%;
+- 95th-percentile percentage error: approximately 4,477.3%;
+- 99th-percentile percentage error: approximately 4.78 million%;
+- negative predictions: 13,371.
+
+The diagnostic confirms that the extreme mean MAPE values are driven primarily by near-zero actual loads rather than representative model behavior across the full validation distribution.
+
+MAE remains the primary model-selection criterion, while CVRMSE and MAPE continue to be reported as complementary metrics. MAPE is interpreted cautiously for BDG2 because of its instability near zero.
+
+Output:
+- outputs/tables/bdg2_baseline_mape_diagnostics.csv
+
+## BDG2 Initial Tree-Model Comparison
+
+### Status
+Completed
+
+Random Forest and Extra Trees regressors were evaluated on the BDG2 chronological validation set using the same shared transfer-compatible predictor set used by the linear baseline models.
+
+The training dataset contained:
+- 1,068,891 observations;
+- 200 development buildings.
+
+The validation dataset contained:
+- 234,555 observations;
+- 200 development buildings.
+
+Random Forest used:
+- 200 trees;
+- unrestricted maximum depth;
+- minimum leaf size of 1;
+- maximum feature fraction of 0.7;
+- random state 42.
+
+Extra Trees used a memory-conscious configuration:
+- 200 trees;
+- maximum depth of 20;
+- minimum leaf size of 5;
+- maximum feature fraction of 0.7;
+- random state 42;
+- two parallel jobs.
+
+### Validation Results
+
+| Model | MAE | CVRMSE | MAPE |
+|---|---:|---:|---:|
+| Seasonal Naive | 14.9023 | 40.356% | 19.796% |
+| Linear Regression | 14.0068 | 23.880% | 140572.338% |
+| Lasso alpha=0.1 | 13.9437 | 23.880% | 137992.548% |
+| Random Forest | 8.0671 | 16.878% | 26.492% |
+| Extra Trees | 8.5620 | 17.400% | 230.334% |
+
+Random Forest achieved the lowest validation MAE and CVRMSE among all evaluated models.
+
+Relative to Seasonal Naive, Random Forest reduced validation MAE by approximately 45.9%.
+
+Extra Trees also substantially improved MAE relative to the baseline but was inferior to Random Forest on both MAE and CVRMSE.
+
+MAPE continued to be interpreted cautiously because the BDG2 validation distribution contains many near-zero electricity observations.
+
+Outputs:
+- outputs/tables/bdg2_tree_validation_metrics.csv
+- outputs/tables/bdg2_model_validation_metrics.csv
+- outputs/models/bdg2_random_forest_initial.joblib
+- outputs/models/bdg2_extra_trees_initial.joblib
+
+## BDG2 Random Forest Tuning
+
+### Status
+Completed
+
+A compact time-aware Random Forest tuning procedure was conducted using only the BDG2 training period.
+
+The training set contained 6,013 unique target timestamps. Three expanding chronological cross-validation folds were constructed so that each validation period occurred strictly after its corresponding training period.
+
+Two Random Forest configurations were compared using 100 trees during cross-validation.
+
+Candidate 1:
+- maximum depth: unrestricted;
+- minimum leaf size: 1;
+- maximum feature fraction: 0.7.
+
+Candidate 2:
+- maximum depth: 20;
+- minimum leaf size: 5;
+- maximum feature fraction: 0.7.
+
+Candidate selection was based on mean cross-validation MAE.
+
+### Cross-Validation Results
+
+| Candidate | Mean CV MAE | CV MAE SD | Mean CVRMSE | Mean MAPE |
+|---|---:|---:|---:|---:|
+| RF candidate 2 | 9.0646 | 0.7791 | 24.419% | 376.174% |
+| RF candidate 1 | 9.2482 | 0.9329 | 24.901% | 277.185% |
+
+RF candidate 2 achieved the lower mean cross-validation MAE and was selected.
+
+The selected configuration was then refit on the full BDG2 training set using 200 trees and evaluated once on the untouched validation set.
+
+### Untouched Validation Result
+
+| Model | MAE | CVRMSE | MAPE |
+|---|---:|---:|---:|
+| Tuned Random Forest | 8.0658 | 16.911% | 15.506% |
+
+The tuned Random Forest produced nearly the same MAE as the initial unrestricted Random Forest but was selected using the predefined time-aware cross-validation procedure and produced substantially lower validation MAPE.
+
+The tuned Random Forest was therefore locked as the final BDG2 model for temporal-test and held-out-building evaluation.
+
+Outputs:
+- outputs/tables/bdg2_rf_tuning_cv_results.csv
+- outputs/tables/bdg2_rf_tuned_best_params.csv
+- outputs/tables/bdg2_rf_tuned_validation_metrics.csv
+- outputs/models/bdg2_random_forest_tuned.joblib
+## BDG2 Final Model Evaluation
+
+### Status
+Completed
+
+The tuned BDG2 Random Forest was locked after validation and evaluated without further fitting or model selection on the temporal test set and the held-out-building test set.
+
+The final Random Forest configuration used:
+- 200 trees;
+- maximum depth of 20;
+- minimum leaf size of 5;
+- maximum feature fraction of 0.7;
+- random state 42.
+
+The temporal test contained:
+- 226,947 observations;
+- 200 development buildings;
+- target period from November 8, 2017 through December 31, 2017.
+
+The held-out-building test contained:
+- 58,133 observations;
+- 50 buildings excluded from model development;
+- the same final target period as the temporal test.
+
+### Overall Test Results
+
+| Dataset | Model | MAE | CVRMSE | MAPE |
+|---|---|---:|---:|---:|
+| Temporal Test | Tuned Random Forest | 7.7670 | 15.242% | 125.126% |
+| Temporal Test | Seasonal Naive | 11.8266 | 26.292% | 1072.064% |
+| Held-Out Building Test | Tuned Random Forest | 8.6491 | 16.947% | 12.303% |
+| Held-Out Building Test | Seasonal Naive | 9.4809 | 19.307% | 14.298% |
+
+On the temporal test, the tuned Random Forest reduced MAE by approximately 34.3% relative to Seasonal Naive.
+
+On the held-out-building test, the tuned Random Forest reduced MAE by approximately 8.8% relative to Seasonal Naive.
+
+### Per-Building Results
+
+For the temporal test:
+- Random Forest achieved lower MAE than Seasonal Naive for 171 of 200 buildings;
+- the Random Forest building-level MAE win rate was 85.5%;
+- median Random Forest MAE was 4.8254;
+- median Seasonal Naive MAE was 7.4311.
+
+For the held-out-building test:
+- Random Forest achieved lower MAE than Seasonal Naive for 35 of 50 buildings;
+- the Random Forest building-level MAE win rate was 70.0%;
+- median Random Forest MAE was 6.3836;
+- median Seasonal Naive MAE was 8.2083.
+
+The held-out results indicate that the final BDG2 model retained useful predictive skill when applied to buildings that were completely excluded from model development.
+
+MAPE continues to be interpreted cautiously because the BDG2 target distribution includes near-zero electricity readings that can produce extreme percentage errors.
+
+Outputs:
+- outputs/tables/bdg2_final_test_metrics.csv
+- outputs/tables/bdg2_final_test_metrics_by_building.csv
+- outputs/tables/bdg2_final_building_win_summary.csv
+## ComStock-BDG2 Target Scale Compatibility Check
+
+### Status
+Completed
+
+Before performing simulated-to-real transfer, the hourly electricity target distributions for ComStock and BDG2 were compared to assess whether direct raw-scale application was numerically defensible.
+
+ComStock hourly target distribution:
+- mean: 89.5678;
+- median: 37.8215;
+- 95th percentile: 325.1196;
+- 99th percentile: 909.4414;
+- maximum: 2,879.223.
+
+BDG2 hourly target distribution:
+- mean: 134.6628;
+- median: 60.0000;
+- 95th percentile: 554.0000;
+- 99th percentile: 968.0000;
+- maximum: 4,587.266.
+
+The two datasets occupy the same general order of magnitude and show substantial overlap in their hourly electricity-consumption distributions, although BDG2 has higher typical consumption.
+
+Inspection of the ComStock preparation pipeline confirmed that 15-minute electricity values are summed to hourly totals and that no additional numerical unit conversion is applied during hourly aggregation.
+
+An explicit local BDG2 unit declaration was not identified in the repository search. This remaining documentation uncertainty is treated as a limitation of the transfer analysis rather than a reason to rescale either dataset after model development.
+
+The project therefore proceeds with direct raw-scale ComStock-to-BDG2 transfer using only features that can be mapped consistently between both datasets.
+
+## ComStock-to-BDG2 Transfer Evaluation
+
+### Status
+Completed
+
+A direct simulated-to-real generalization test was conducted by training a Random Forest on California ComStock data using only predictors that could be mapped consistently to BDG2.
+
+The shared feature contract contained:
+- 1-hour electricity lag;
+- 24-hour electricity lag;
+- prior 24-hour mean electricity consumption;
+- prior 168-hour mean electricity consumption;
+- cyclical hour variables;
+- cyclical day-of-week variables;
+- cyclical month variables;
+- weekend indicator;
+- air temperature;
+- wind speed;
+- heating degree measure;
+- cooling degree measure.
+
+The transfer model excluded ComStock-specific metadata so that its predictor contract matched the BDG2 feature space.
+
+### Computational Adjustment
+
+The original 200-tree shared-feature ComStock Random Forest could not be loaded for transfer evaluation because of local memory constraints.
+
+A 100-tree version using the same Random Forest structure was therefore trained as a computationally lighter implementation.
+
+Its ComStock validation performance was:
+
+| Model | MAE | CVRMSE | MAPE |
+|---|---:|---:|---:|
+| Shared-Feature RF, 100 Trees | 4.5429 | 14.760% | 7.830% |
+| Seasonal Naive | 9.9371 | 71.528% | 14.756% |
+
+The 100-tree model's validation MAE was approximately 0.5% higher than the previously trained 200-tree shared-feature model, indicating that the reduced tree count did not materially alter source-domain performance.
+
+### BDG2 Transfer Results
+
+The ComStock-trained model was applied directly to the same BDG2 temporal and held-out-building test observations used for the internal BDG2 model.
+
+| Dataset | Model | MAE | CVRMSE | MAPE |
+|---|---|---:|---:|---:|
+| Temporal Test | ComStock-to-BDG2 Transfer RF | 16.2295 | 30.685% | 16283.540% |
+| Temporal Test | BDG2 Internal Tuned RF | 7.7670 | 15.242% | 125.126% |
+| Temporal Test | Seasonal Naive | 11.8266 | 26.292% | 1072.064% |
+| Held-Out Building Test | ComStock-to-BDG2 Transfer RF | 12.8735 | 25.024% | 243.918% |
+| Held-Out Building Test | BDG2 Internal Tuned RF | 8.6491 | 16.947% | 12.303% |
+| Held-Out Building Test | Seasonal Naive | 9.4809 | 19.307% | 14.298% |
+
+The transfer model did not outperform either the BDG2-trained model or Seasonal Naive at the aggregate level.
+
+On the temporal test, transfer MAE was approximately 37% higher than Seasonal Naive and more than twice the MAE of the BDG2 internal model.
+
+On the held-out-building test, transfer MAE was approximately 36% higher than Seasonal Naive and approximately 49% higher than the BDG2 internal model.
+
+### Per-Building Transfer Results
+
+Temporal test:
+- transfer model beat Seasonal Naive on 93 of 200 buildings (46.5%);
+- transfer model beat the BDG2 internal model on 3 of 200 buildings (1.5%).
+
+Held-out-building test:
+- transfer model beat Seasonal Naive on 18 of 50 buildings (36.0%);
+- transfer model beat the BDG2 internal model on 3 of 50 buildings (6.0%).
+
+These results indicate a substantial simulation-to-real domain gap. Strong predictive performance within ComStock did not translate into competitive performance on real BDG2 electricity meters under direct raw-scale transfer.
+
+The transfer test therefore supports treating simulated NREL data as useful for model development and controlled experimentation, but not as a substitute for real-meter training data when direct deployment to real commercial buildings is required.
+
+MAPE is interpreted cautiously because near-zero BDG2 electricity readings produce unstable percentage errors.
+
+Outputs:
+- outputs/models/comstock_shared_feature_random_forest_100trees.joblib
+- outputs/tables/comstock_shared_feature_validation_metrics_100trees.csv
+- outputs/tables/comstock_to_bdg2_transfer_metrics.csv
+- outputs/tables/comstock_to_bdg2_transfer_metrics_by_building.csv
+- outputs/tables/comstock_to_bdg2_transfer_win_summary.csv
+
+## EIA-930 California Grid Context
+
+### Status
+Completed
+
+The EIA-930 California hourly operating dataset was analyzed as grid-level context rather than as an additional machine-learning forecasting dataset.
+
+The source contained:
+- 97,992 hourly observations;
+- data from July 1, 2015 through September 3, 2026;
+- hourly demand;
+- demand forecast;
+- net generation;
+- total interchange;
+- generation by fuel source.
+
+Twenty-four observations had missing actual demand. These observations were excluded from demand-based contextual statistics rather than imputed, leaving 97,968 observed-demand hours.
+
+### California Demand Context
+
+Across the observed period:
+- mean hourly demand: 31,359.55 MWh;
+- median hourly demand: 30,141 MWh;
+- 95th-percentile demand: 44,644.65 MWh;
+- 99th-percentile demand: 51,110.33 MWh;
+- maximum observed demand: 63,622 MWh.
+
+The maximum observed demand occurred at 6:00 PM local time on September 6, 2022.
+
+The highest-demand observations were concentrated primarily in late-afternoon and early-evening hours, indicating that California system peaks occur during periods of strong evening demand.
+
+### Generation and Interchange Context
+
+Mean hourly net generation was 23,970.04 MWh.
+
+Mean total interchange was -6,479.42 MWh. Under the EIA-930 sign convention, negative interchange represents net inflow, indicating that California was a net importer on average over the analysis period.
+
+Among positive reported generation, the largest cumulative sources were:
+- Natural gas: 44.40%;
+- Solar: 19.77%;
+- Hydro: 11.58%;
+- Wind: 8.76%;
+- Nuclear: 8.18%.
+
+These percentages describe shares of positive reported generation across the EIA-930 analysis period and are used only for broad system context.
+
+### EIA Demand-Forecast Accuracy
+
+The published EIA demand forecast was compared with observed demand for the 97,968 hours with actual demand.
+
+Forecast performance was:
+- MAE: 1,276.02 MWh;
+- RMSE: 2,143.96 MWh;
+- CVRMSE: 6.84%;
+- MAPE: 4.11%;
+- mean forecast error: 627.44 MWh.
+
+The positive mean forecast error, calculated as actual demand minus forecast demand, indicates that observed demand was somewhat higher than forecast demand on average.
+
+The EIA forecast comparison is included as contextual evidence about grid-level forecast accuracy and is not treated as a directly comparable benchmark for the building-level forecasting models because the aggregation scale and forecasting task differ substantially.
+
+Outputs:
+- outputs/tables/eia930_california_summary.csv
+- outputs/tables/eia930_california_annual_summary.csv
+- outputs/tables/eia930_california_monthly_profile.csv
+- outputs/tables/eia930_california_hourly_profile.csv
+- outputs/tables/eia930_california_peak_demand_hours.csv
+- outputs/tables/eia930_california_generation_mix.csv
+- outputs/tables/eia930_california_forecast_error_summary.csv
+- outputs/figures/eia930_average_demand_by_hour.png
+- outputs/figures/eia930_average_demand_by_month.png
+- outputs/figures/eia930_generation_mix.png
+

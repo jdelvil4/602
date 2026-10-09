@@ -1,0 +1,16 @@
+comstock_column,canonical_feature,bdg2_column
+lag_1h,electricity_lag_1,electricity_lag_1
+lag_24h,electricity_lag_24,electricity_lag_24
+rolling_mean_24h,electricity_rolling_24h_mean,electricity_rolling_24h_mean
+rolling_mean_168h,electricity_rolling_168h_mean,electricity_rolling_168h_mean
+hour_sin,hour_sin,hour_sin
+hour_cos,hour_cos,hour_cos
+day_of_week_sin,dow_sin,dow_sin
+day_of_week_cos,dow_cos,dow_cos
+month_sin,month_sin,month_sin
+month_cos,month_cos,month_cos
+is_weekend,is_weekend,is_weekend
+Dry Bulb Temperature [°C],airTemperature,airTemperature
+Wind Speed [m/s],windSpeed,windSpeed
+heating_degree,heating_degree,heating_degree
+cooling_degree,cooling_degree,cooling_degree

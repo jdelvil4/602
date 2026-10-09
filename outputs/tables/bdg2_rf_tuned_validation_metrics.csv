@@ -1,0 +1,2 @@
+model,candidate,n_estimators,max_depth,min_samples_leaf,max_features,MAE,CVRMSE_percent,MAPE_percent,MAPE_n,fit_seconds,predict_seconds
+Tuned Random Forest,RF_candidate_2,200,20,5,0.7,8.065813238452446,16.910576276058496,15.505811352058357,234555,190.800003500015,1.614587299991399

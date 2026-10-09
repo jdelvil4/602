@@ -1,0 +1,3 @@
+dataset,total_buildings,rf_MAE_wins,seasonal_MAE_wins_or_ties,rf_MAE_win_percent,median_rf_MAE,median_seasonal_MAE
+Held-Out Building Test,50,35,15,70.0,6.383618214239231,8.2083160965951
+Temporal Test,200,171,29,85.5,4.825423343986717,7.431141620746551

@@ -1,0 +1,133 @@
+category,item,status,detail
+expected_file,requirements.txt,PASS,File exists.
+expected_file,docs/methodology_log.md,PASS,File exists.
+expected_file,docs/decision_log.md,PASS,File exists.
+expected_file,src/evaluation/metrics.py,PASS,File exists.
+expected_file,src/evaluation/build_final_synthesis.py,PASS,File exists.
+expected_file,src/evaluation/final_project_audit.py,PASS,File exists.
+expected_file,src/data/analyze_eia930_context.py,PASS,File exists.
+expected_file,src/models/train_comstock_transfer_model.py,PASS,File exists.
+expected_file,src/models/train_comstock_transfer_model_light.py,PASS,File exists.
+expected_file,src/models/evaluate_comstock_to_bdg2_transfer.py,PASS,File exists.
+expected_file,outputs/tables/nrel_final_test_metrics.csv,PASS,File exists.
+expected_file,outputs/tables/comstock_final_test_metrics.csv,PASS,File exists.
+expected_file,outputs/tables/bdg2_final_test_metrics.csv,PASS,File exists.
+expected_file,outputs/tables/comstock_shared_feature_validation_metrics_100trees.csv,PASS,File exists.
+expected_file,outputs/tables/comstock_to_bdg2_transfer_metrics.csv,PASS,File exists.
+expected_file,outputs/tables/comstock_to_bdg2_transfer_metrics_by_building.csv,PASS,File exists.
+expected_file,outputs/tables/comstock_to_bdg2_transfer_win_summary.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_summary.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_annual_summary.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_monthly_profile.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_hourly_profile.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_peak_demand_hours.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_generation_mix.csv,PASS,File exists.
+expected_file,outputs/tables/eia930_california_forecast_error_summary.csv,PASS,File exists.
+expected_file,outputs/tables/final_model_performance_summary.csv,PASS,File exists.
+expected_file,outputs/tables/final_mae_improvement_vs_seasonal.csv,PASS,File exists.
+expected_file,outputs/tables/final_transfer_comparison.csv,PASS,File exists.
+expected_file,outputs/tables/final_project_key_findings.csv,PASS,File exists.
+expected_file,outputs/figures/eia930_average_demand_by_hour.png,PASS,File exists.
+expected_file,outputs/figures/eia930_average_demand_by_month.png,PASS,File exists.
+expected_file,outputs/figures/eia930_generation_mix.png,PASS,File exists.
+expected_file,outputs/figures/final_mae_improvement_vs_seasonal.png,PASS,File exists.
+expected_file,outputs/figures/final_simulated_vs_real_transfer.png,PASS,File exists.
+expected_file,outputs/models/comstock_shared_feature_random_forest_100trees.joblib,PASS,File exists.
+python_syntax,src\__init__.py,PASS,Python syntax parsed successfully.
+python_syntax,src\config.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\__init__.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\analyze_eia930_context.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\download_comstock_ca_modeling_profiles.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\download_comstock_missing_weather.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\download_nrel_ca_modeling_profiles.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\download_nrel_ca_profiles.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\download_nrel_weather.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\from pathlib import Path.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_bdg2.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_bdg2_modeling_coverage.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_comstock_metadata.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_comstock_profile.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_comstock_timeseries.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_comstock_weather_coverage.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_nrel_ca_timeseries.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_nrel_s3.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_nrel_timeseries.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_nrel_weather.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_nrel_weather_file.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\inspect_nrel_weather_quality.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\merge_comstock_metadata.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\merge_comstock_weather.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\merge_nrel_metadata.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\merge_nrel_weather.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_bdg2.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_bdg2_modeling_panel.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_comstock.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_comstock_modeling_profiles.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_nrel.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_nrel_load_profiles.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_nrel_modeling_profiles.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\prepare_uci.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\select_bdg2_modeling_sample.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\select_comstock_modeling_sample.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\select_nrel_modeling_sample.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\split_bdg2.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\split_comstock.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\split_nrel.py,PASS,Python syntax parsed successfully.
+python_syntax,src\data\split_uci.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\__init__.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\analyze_nrel_clusters.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\analyze_uci_final.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\build_final_synthesis.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\cluster_nrel_load_shapes.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\diagnose_bdg2_baseline_mape.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\diagnose_nrel_final.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\eda_nrel_pilot.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\eda_uci.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\evaluate_comstock_final.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\evaluate_nrel_final.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\final_project_audit.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\metrics.py,PASS,Python syntax parsed successfully.
+python_syntax,src\evaluation\plot_uci_model_comparison.py,PASS,Python syntax parsed successfully.
+python_syntax,src\features\__init__.py,PASS,Python syntax parsed successfully.
+python_syntax,src\features\bdg2_forecast_features.py,PASS,Python syntax parsed successfully.
+python_syntax,src\features\comstock_forecast_features.py,PASS,Python syntax parsed successfully.
+python_syntax,src\features\forecast_features.py,PASS,Python syntax parsed successfully.
+python_syntax,src\features\nrel_forecast_features.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\__init__.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\cluster_uci.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_bdg2_baselines.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_bdg2_final.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_bdg2_trees.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_comstock_baselines.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_comstock_to_bdg2_transfer.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_comstock_trees.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\evaluate_uci_final.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\nrel_baselines.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\nrel_linear_models.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\nrel_tree_models.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\train_comstock_transfer_model.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\train_comstock_transfer_model_light.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\train_uci_baselines.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\train_uci_tree_models.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\tune_bdg2_random_forest.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\tune_comstock_trees.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\tune_nrel_tree_models.py,PASS,Python syntax parsed successfully.
+python_syntax,src\models\tune_uci_models.py,PASS,Python syntax parsed successfully.
+dependency,pandas,PASS,Imported by project and listed in requirements.txt.
+dependency,numpy,PASS,Imported by project and listed in requirements.txt.
+dependency,scikit-learn,PASS,Imported by project and listed in requirements.txt.
+dependency,joblib,PASS,Imported by project and listed in requirements.txt.
+dependency,matplotlib,PASS,Imported by project and listed in requirements.txt.
+dependency,pyarrow,PASS,Imported by project and listed in requirements.txt.
+dependency,openpyxl,PASS,Listed in requirements.txt; not detected in src imports.
+dependency,boto3,PASS,Imported by project and listed in requirements.txt.
+placeholder_scan,src and README,PASS,No common placeholder strings found.
+hardcoded_path,src,PASS,No C:\Users\ hard-coded paths detected.
+decision_log,duplicate IDs,PASS,No duplicate decision IDs found.
+methodology_log,duplicate headings,PASS,No duplicate H2 headings found.
+final_table,final_model_performance_summary.csv,PASS,18 rows; required columns present.
+final_table,final_mae_improvement_vs_seasonal.csv,PASS,6 rows; required columns present.
+final_table,final_transfer_comparison.csv,PASS,6 rows; required columns present.
+final_table,final_project_key_findings.csv,PASS,6 rows; required columns present.
+formatting,final_project_key_findings.csv,PASS,No obvious spacing issues detected.
+git,working tree,WARN,59 uncommitted file change(s) detected.

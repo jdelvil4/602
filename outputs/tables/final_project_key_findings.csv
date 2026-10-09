@@ -1,0 +1,7 @@
+topic,finding
+UCI prototype,"Tuned Extra Trees completed the prototype workflow with final-test MAE 182.259, CVRMSE 52.608%, and MAPE 29.991%."
+Residential forecasting,ResStock final model improved temporal-test MAE by 23.4% relative to Seasonal Naive.
+Commercial simulated forecasting,ComStock final model improved temporal-test MAE by 64.0% relative to Seasonal Naive.
+Real-building generalization,BDG2 internal model improved held-out-building MAE by 8.8% relative to Seasonal Naive.
+Simulation-to-real transfer,"Direct ComStock-to-BDG2 transfer produced temporal MAE 16.229, compared with 7.767 for the internally trained BDG2 model."
+California grid context,"EIA-930 demand forecast achieved MAE 1276.0 MWh, CVRMSE 6.84%, and MAPE 4.11%."
