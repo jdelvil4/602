@@ -12,7 +12,7 @@ A main aim is not just to check how accurate the predictions are, but to see how
 
 3. Can a model which has been trained on data relating to offices actually handle real electricity data from offices?
 
-The project involves the use of Python and Scikit-Learn, with a time-based splitting method, cross-validation that is time-aware and which tests on buildings not seen during training, and full documentation of the modelling decisions.
+The project involves the use of Python and Scikit-Learn, with a time-based splitting method, and cross-validation that is time-aware and which tests on buildings not seen during training.
 
 ---
 
