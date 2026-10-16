@@ -13,12 +13,13 @@ A main aim is not just to check how accurate the predictions are, but to see how
 3. Can a model which has been trained on data relating to offices actually handle real electricity data from offices?
 
 The project involves the use of Python and Scikit-Learn, with a time-based splitting method, and cross-validation that is time-aware and which tests on buildings not seen during training.
+The project involves the use of Python and Scikit-Learn, with a time-based splitting method, cross-validation that is time-aware and which tests on buildings not seen during training, and full documentation of the modeling decisions.
 
 ---
 
 ## Key Results
 
-The findings indicate that tree-based models generally assist with predictions made one hour in advance; the degree of their performance is very much dependent on the kind of generalisation under consideration.
+The findings indicate that tree-based models generally assist with predictions made one hour in advance; the degree of their performance is very much dependent on the kind of generalization under consideration.
 
 | Dataset | Final Model | Evaluation | Model MAE | Seasonal Naive MAE | MAE Improvement |
 
@@ -363,3 +364,443 @@ The last group included four patterns relating to residential use, with operatin
 ├── requirements.txt
 
 └── README.md
+
+## Reproducing the Analysis
+
+I've tested this project out on Windows using Python and PowerShell.
+
+Once you've cloned the repo and installed the dependencies as listed in the file requirements.txt you'll want to run the analysis from the root of the repo.
+
+### Required Source Data
+
+Several source datasets are too large to keep in the GitHub repository and you'll need to obtain them separately.
+
+The project uses the following datasets:
+
+- UCI Appliances Energy Prediction
+
+- NREL ResStock
+
+- NREL ComStock
+
+- Building Data Genome Project 2 (BDG2)
+
+- EIA-930 California grid data
+
+The local project structure expects the major source files and repositories in locations such as:
+
+```text
+
+appliances+energy+prediction/
+
+building-data-genome-project-2/
+
+data/
+
+Region_CAL.xlsx
+
+```
+
+### `src/data/`
+
+Carrying out data inspection, obtaining data, preparing the data, taking samples, carrying out hourly aggregation, integrating weather data and carrying out chronological splitting.
+
+### `src/features/`
+
+Forecast feature engineering.
+
+### `src/models/`
+
+Baseline evaluation. Modeling. Hyperparameter tuning. Final model evaluation. ComStock to BDG2 transfer modeling.
+
+### `src/evaluation/`
+
+Utilities for shared evaluation, model diagnostics, cross-dataset synthesis, and reproducibility checks.
+
+### `outputs/`
+
+Tables, graphs, predictions and the fitted model items were generated.
+
+---
+
+## Code and Reproducibility
+
+All source code and generated project outputs are available in this GitHub repository:
+
+https://github.com/jdelvil4/602
+
+### Repository Contents
+
+- `src/`: project source code
+
+- `data/`: data dictionaries, metadata and processed data locations used by the project
+
+- `outputs/tables/`: generated evaluation tables and summaries
+
+- `outputs/figures/`: generated project figures
+
+- `outputs/models/`: fitted model artifacts that are retained
+
+- `outputs/predictions/`: saved prediction outputs that are retained
+
+- `requirements.txt`: the Python packages Dependencies needed by the project
+
+## How to Reproduce the Results
+
+The project was developed and tested on Windows with the use of Python and PowerShell.
+
+### 1. Copy the repository
+
+```powershell
+
+git clone https://github.com/jdelvil4/602.git
+
+cd 602
+
+```
+
+### 2. Set up the Python environment
+
+```powershell
+
+python -m venv.venv
+
+.\.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+
+pip install -r requirements.txt
+
+```
+
+The project makes use of various packages including Pandas, NumPy, Scikit-Learn, Matplotlib, Joblib, PyArrow, OpenPyXL and Boto3.
+
+### 3. Get the source data
+
+Some of the source datasets are so large that they cannot be stored in the GitHub repository and must therefore be obtained separately.
+
+Required datasets are:
+
+- UCI Appliances Energy Prediction
+
+- NREL ResStock
+
+- NREL ComStock
+
+- Building Data Genome Project 2
+
+- EIA-930 California hourly data
+
+The local project structure expects major source data in locations such as:
+
+```text
+
+appliances+energy+prediction/
+
+building-data-genome-project-2/
+
+data/
+
+Region_CAL.xlsx
+
+```
+
+For BDG2 expected source files include:
+
+```text
+
+building-data-genome-project-2/data/metadata/metadata.csv
+
+building-data-genome-project-2/data/meters/cleaned/electricity_cleaned.csv
+
+building-data-genome-project-2/data/weather/weather.csv
+
+```
+
+NREL metadata files are expected under:
+
+```text
+
+data/resstock_metadata.parquet
+
+data/comstock_metadata.parquet
+
+```
+
+The UCI source file is:
+
+```text
+
+appliances+energy+prediction/energydata_complete.csv
+
+```
+
+The individual-building profiles and weather files from NREL are downloaded and then processed using the projects' data-acquisition and preparation scripts.
+
+### 4. Carry out the workflow
+
+1. Have a look at and get the source datasets ready.
+
+2. Change the electricity measurements to a hourly resolution.
+
+3. Combine weather data and building information.
+
+4. Generate features for forecasting that are ahead by one hour.
+
+Create the training, validation and test sets.
+
+6. Set aside some buildings that are not part of the main group for use in evaluating buildings across the group.
+
+7. Assess the Seasonal Naive Linear Regression and Lasso baseline models.
+
+8. Train and tune the tree-based models.
+
+9. Assess the locked models using temporal and held-out-building tests.
+
+Carry out the ComStock-to-BDG2 simulated-to-real transfer experiment.
+
+11. Carry out an analysis of the California grid context as specified in EIA-930.
+
+Produce synthesis outputs across datasets.
+
+Carry out the reproducibility audit.
+
+Source code is organized by stage:
+
+```text
+
+src/data/        data preparation, inspection, sampling and splitting
+
+src/features/    forecasting feature engineering
+
+src/models/      baseline models, tree models, tuning and final evaluation
+
+src/evaluation/  metrics, diagnostics, synthesis and reproducibility checks
+
+```
+
+### 5.. Transfer Workflow
+
+The later‑stage BDG2 and simulated‑to‑real workflow can be run from the repository root with:
+
+```powershell
+
+python -m src.data.prepare_bdg2
+
+python -m src.data.select_bdg2_modeling_sample
+
+python -m src.data.prepare_bdg2_modeling_panel
+
+python -m src.features.bdg2_forecast_features
+
+python -m src.data.split_bdg2
+
+python -m src.models.evaluate_bdg2_baselines
+
+python -m src.models.evaluate_bdg2_trees
+
+```
+
+```bash
+
+python -m src.models.tune_bdg2_random_forest
+
+python -m src.models.evaluate_bdg2_final
+
+python -m src.models.train_comstock_transfer_model_light
+
+python -m src.models.evaluate_comstock_to_bdg2_transfer
+
+python -m src.data.analyze_eia930_context
+
+python -m src.evaluation.build_final_synthesis
+
+```
+
+The UCI, ResStock and ComStock stages involve the same steps: preparation, feature engineering, splitting, modeling, tuning and final evaluation, the scripts for each of these stages being found in the `src/` directory.
+
+### 6. Reproducibility Settings
+
+```python
+
+RANDOM_STATE = 42
+
+TRAIN_FRACTION = 0.70
+
+VALIDATION_FRACTION = 0.15
+
+TEST_FRACTION = 0.15
+
+FORECAST_HORIZON_HOURS = 1
+
+```
+
+The datasets for forecasting are divided in the order of time at random.
+
+For the multi‑building analyses:
+
+The model is developed using 200 buildings.
+
+- Fifty buildings are designated as held-out buildings.
+
+- The buildings that are held out are not employed in the process of model fitting or hyperparameter tuning.
+
+- When it applies, the final forecast period is used in both temporal and held-out evaluations.
+
+### 7. Generated Outputs
+
+Processed datasets are written to:
+
+```text
+
+data/processed/
+
+```
+
+Model results and artifacts are written under:
+
+```text
+
+outputs/tables/
+
+outputs/models/
+
+outputs/predictions/
+
+```
+
+Figures are written to:
+
+```text
+
+outputs/figures/
+
+```
+
+Important final outputs include:
+
+```text
+
+outputs/tables/final_model_performance_summary.csv
+
+outputs/tables/final_mae_improvement_vs_seasonal.csv
+
+outputs/tables/final_transfer_comparison.csv
+
+outputs/tables/final_project_key_findings.csv
+
+outputs/figures/final_mae_improvement_vs_seasonal.png
+
+outputs/figures/final_simulated_vs_real_transfer.png
+
+```
+
+### 8. Final Verification
+
+After the analysis is run:
+
+```powershell
+
+python -m src.evaluation.final_project_audit
+
+```
+
+The most recent completed project audit reported:
+
+```text
+
+PASS: 131
+
+FAIL: 0
+
+```
+
+The last Git working-tree warning that was discovered as a result of the audit was dealt with by making the project changes and synchronizing the repository with origin/main.
+
+The entire workflow involves millions of building-hour observations and uses tree-based ensemble models, so it may require a large amount of disk space, memory and time.
+
+## Final Cross‑Dataset Synthesis
+
+The final project‑level comparison can be regenerated with:
+
+```powershell
+
+python -m src.evaluation.build_final_synthesis
+
+```
+
+The synthesis evaluates the performance of the models by comparing them with the Seasonal Naive method and looks at the raw MAE for each dataset.
+
+This is important since the datasets include electricity-consumption scales.
+
+The primary cross‑dataset figure is:
+
+```text
+
+outputs/figures/final_mae_improvement_vs_seasonal.png
+
+```
+
+The simulated‑to‑real transfer comparison is presented separately in:
+
+```text
+
+outputs/figures/final_simulated_vs_real_transfer.png
+
+```
+
+## Interpretation
+
+The project supports four conclusions:
+
+The information needed to forecast electricity consumption one hour in advance includes historical consumption data, variables related to time, and weather conditions.
+
+2. Ensemble models based on trees usually produce forecasts that are better than simple baseline models, but the extent of the improvement varies considerably depending on the dataset and the way in which it is evaluated.
+
+3. It is possible to make much better forecasts when using data from buildings that are familiar than when forecasting for buildings that have never been seen before.
+
+4. The fact that the model performs well on building data does not imply that it will work well on actual meters, since a direct transfer from ComStock to BDG2 failed without domain adaptation or training in the real world.
+
+## Limitations
+
+Several limitations should be considered when interpreting the results:
+
+- A small number of the various NREL and BDG2 buildings were used in the models.
+
+The number of hyperparameter searches was kept small due to the size of the dataset, the available computation time, and the limited system memory.
+
+The evaluation of the building that is being held back assumes that each building has past electricity readings for the lagged predictors and is therefore not a cold-start test with no history.
+
+-The direct transfer from ComStock to BDG2 made use of a shared raw-scale feature contract. Neither a clear local BDG2 unit declaration was found, so any doubts regarding the unit documentation should be borne in mind when examining the transfer experiment.
+
+- MAPE may become unstable if the actual electricity consumption is near zero.
+
+The EIA-930 operates at the grid level and cannot therefore be regarded as directly comparable to building-level forecasting models.
+
+- Certain raw datasets are so large that they cannot be shared in this repository and must be obtained separately.
+
+## Future Work
+
+Potential extensions include:
+
+Domain adaptation happens between real building data.
+
+- Training that involves the use of both simulated and actual meter observations.
+
+- It seems to me that more geographic regions should be included.
+
+- I observe that the number of buildings is increasing.
+
+In my opinion, it is essential to have cold-start forecasting for buildings when there is no historical meter data.
+
+I know that probabilistic forecasting and uncertainty estimation are important.
+
+I think live meter integration is essential.
+
+- I believe that aggregating building forecasts at a community or grid level is useful.
+
+## Repository
+
+GitHub:
+
+https://github.com/jdelvil4/602
